@@ -1,0 +1,691 @@
+IQ-TREE multicore version 1.6.12 for Mac OS X 64-bit built Aug 15 2019
+Developed by Bui Quang Minh, Nguyen Lam Tung, Olga Chernomor,
+Heiko Schmidt, Dominik Schrempf, Michael Woodhams.
+
+Host:    Simons-MBP-5.local (SSE4.2, 128 GB RAM)
+Command: IQTREE_version_1_6_12/iqtree -s Alignment_101025.fas -m MFP -mem 10Go -mset GTR -nt 4
+Seed:    371874 (Using SPRNG - Scalable Parallel Random Number Generator)
+Time:    Fri Oct 10 14:57:41 2025
+Kernel:  SSE2 - 4 threads (16 CPU cores detected)
+
+Reading alignment file Alignment_101025.fas ... Fasta format detected
+Alignment most likely contains DNA/RNA sequences
+Alignment has 253 sequences with 11172 columns, 1733 distinct patterns
+858 parsimony-informative, 493 singleton sites, 9821 constant sites
+WARNING: Some sequence names are changed as follows:
+KJ941050|USA|2006 -> KJ941050_USA_2006
+FJ445426|Sri-Lanka|2008-04 -> FJ445426_Sri-Lanka_2008-04
+FJ445427|Sri-Lanka|2007-07 -> FJ445427_Sri-Lanka_2007-07
+FJ445428|Sri-Lanka|2007-05 -> FJ445428_Sri-Lanka_2007-05
+FJ445430|Singapore|2008-07 -> FJ445430_Singapore_2008-07
+FJ445431|Singapore|2008-07 -> FJ445431_Singapore_2008-07
+KP003807|France|2006 -> KP003807_France_2006
+FJ445432|Singapore|2008-07 -> FJ445432_Singapore_2008-07
+FJ445433|Singapore|2008-08 -> FJ445433_Singapore_2008-08
+KP003808|Madagascar|2006 -> KP003808_Madagascar_2006
+KP003809|Mayotte|2006 -> KP003809_Mayotte_2006
+KP003810|Italy|2007 -> KP003810_Italy_2007
+KP003811|Italy|2007 -> KP003811_Italy_2007
+KP003812|Gabon|2007 -> KP003812_Gabon_2007
+KP003813|Democratic-Republic-of-the-Congo|2011 -> KP003813_Democratic-Republic-of-the-Congo_2011
+FJ445443|Singapore|2008-08 -> FJ445443_Singapore_2008-08
+KP164568|Brazil|2014-08-26 -> KP164568_Brazil_2014-08-26
+KP164569|Brazil|2014-08-28 -> KP164569_Brazil_2014-08-28
+FJ445445|Singapore|2008-08 -> FJ445445_Singapore_2008-08
+KP164570|Brazil|2014-09-03 -> KP164570_Brazil_2014-09-03
+FJ445463|Singapore|2008-07 -> FJ445463_Singapore_2008-07
+KP702297|Comoros|2005 -> KP702297_Comoros_2005
+FJ445484|Singapore|2008-05 -> FJ445484_Singapore_2008-05
+FJ445502|Singapore|2008-08 -> FJ445502_Singapore_2008-08
+FJ445510|Singapore|2008-01 -> FJ445510_Singapore_2008-01
+FJ445511|Singapore|2008-01 -> FJ445511_Singapore_2008-01
+FJ513628|Sri-Lanka|2008-03 -> FJ513628_Sri-Lanka_2008-03
+FJ513629|Sri-Lanka|2008-03 -> FJ513629_Sri-Lanka_2008-03
+FJ513632|Sri-Lanka|2008-03 -> FJ513632_Sri-Lanka_2008-03
+FJ513635|Sri-Lanka|2008-03 -> FJ513635_Sri-Lanka_2008-03
+FJ513637|Sri-Lanka|2008-03 -> FJ513637_Sri-Lanka_2008-03
+FJ513645|Sri-Lanka|2008-04 -> FJ513645_Sri-Lanka_2008-04
+KC614648|Yemen|2011-01-25 -> KC614648_Yemen_2011-01-25
+FJ513654|Sri-Lanka|2008-04 -> FJ513654_Sri-Lanka_2008-04
+FJ513657|Sri-Lanka|2008-04 -> FJ513657_Sri-Lanka_2008-04
+FJ513673|Sri-Lanka|2008-04 -> FJ513673_Sri-Lanka_2008-04
+FJ513675|Sri-Lanka|2008-04 -> FJ513675_Sri-Lanka_2008-04
+FJ513679|Sri-Lanka|2008-04 -> FJ513679_Sri-Lanka_2008-04
+MT636907|Democratic-Republic-of-the-Congo|2019-01-07 -> MT636907_Democratic-Republic-of-the-Congo_2019-01-07
+MT636908|Democratic-Republic-of-the-Congo|2019-01-07 -> MT636908_Democratic-Republic-of-the-Congo_2019-01-07
+MT636909|Democratic-Republic-of-the-Congo|2019-01-21 -> MT636909_Democratic-Republic-of-the-Congo_2019-01-21
+MT636910|Democratic-Republic-of-the-Congo|2019-01-21 -> MT636910_Democratic-Republic-of-the-Congo_2019-01-21
+MT636911|Democratic-Republic-of-the-Congo|2019-01-21 -> MT636911_Democratic-Republic-of-the-Congo_2019-01-21
+MT636912|Democratic-Republic-of-the-Congo|2019-02-01 -> MT636912_Democratic-Republic-of-the-Congo_2019-02-01
+MT636913|Democratic-Republic-of-the-Congo|2019-02-06 -> MT636913_Democratic-Republic-of-the-Congo_2019-02-06
+MT636914|Democratic-Republic-of-the-Congo|2019-03-26 -> MT636914_Democratic-Republic-of-the-Congo_2019-03-26
+MT636916|Democratic-Republic-of-the-Congo|2019-03-26 -> MT636916_Democratic-Republic-of-the-Congo_2019-03-26
+MT636917|Democratic-Republic-of-the-Congo|2019-03-21 -> MT636917_Democratic-Republic-of-the-Congo_2019-03-21
+MT636918|Democratic-Republic-of-the-Congo|2019-02 -> MT636918_Democratic-Republic-of-the-Congo_2019-02
+MT636919|Democratic-Republic-of-the-Congo|2019-03-20 -> MT636919_Democratic-Republic-of-the-Congo_2019-03-20
+MT636921|Democratic-Republic-of-the-Congo|2019-03-21 -> MT636921_Democratic-Republic-of-the-Congo_2019-03-21
+FJ807896|Singapore|2006 -> FJ807896_Singapore_2006
+FJ807898|Bangladesh|2008 -> FJ807898_Bangladesh_2008
+FJ959103|Mauritius|2006 -> FJ959103_Mauritius_2006
+KT324225|Malaysia|2009-01 -> KT324225_Malaysia_2009-01
+KT324227|Malaysia|2009-03 -> KT324227_Malaysia_2009-03
+FN295485|Malaysia|2008 -> FN295485_Malaysia_2008
+FN295487|Malaysia|2008 -> FN295487_Malaysia_2008
+KT336777|India|2009-04-08 -> KT336777_India_2009-04-08
+FR687345|Malaysia|2009-02-05 -> FR687345_Malaysia_2009-02-05
+FR687347|Malaysia|2009-02-12 -> FR687347_Malaysia_2009-02-12
+FR717336|France|2005-12-26 -> FR717336_France_2005-12-26
+FR717337|France|2005-12-26 -> FR717337_France_2005-12-26
+JF274082|India|2006-09-27 -> JF274082_India_2006-09-27
+EF210157|India|2006 -> EF210157_India_2006
+MH000700|Brazil|2016-02-04 -> MH000700_Brazil_2016-02-04
+MH000703|Brazil|2016-02-15 -> MH000703_Brazil_2016-02-15
+MH000706|Brazil|2016-02-18 -> MH000706_Brazil_2016-02-18
+MH124571|India|2010 -> MH124571_India_2010
+MH124572|India|2010 -> MH124572_India_2010
+MH124573|India|2010 -> MH124573_India_2010
+MH124574|India|2010 -> MH124574_India_2010
+MH124575|India|2010 -> MH124575_India_2010
+MH124576|India|2010 -> MH124576_India_2010
+MH124577|India|2010 -> MH124577_India_2010
+MH124578|India|2010 -> MH124578_India_2010
+MH124579|India|2010 -> MH124579_India_2010
+MH229986|Mauritius|2006 -> MH229986_Mauritius_2006
+MK690206|Democratic-Republic-of-the-Congo|2019 -> MK690206_Democratic-Republic-of-the-Congo_2019
+KU940225|Brazil|2015-07-15 -> KU940225_Brazil_2015-07-15
+MH647212|Singapore|2009-11 -> MH647212_Singapore_2009-11
+MH647214|Singapore|2010-01 -> MH647214_Singapore_2010-01
+MH647215|Singapore|2010-02 -> MH647215_Singapore_2010-02
+GQ428210|India|2006-10-07 -> GQ428210_India_2006-10-07
+GQ428211|India|2006-10-07 -> GQ428211_India_2006-10-07
+GQ428213|India|2007-07-13 -> GQ428213_India_2007-07-13
+GQ428215|India|2008-05-29 -> GQ428215_India_2008-05-29
+EU244823|Italy|2007 -> EU244823_Italy_2007
+EU372006|India|2007-06-11 -> EU372006_India_2007-06-11
+JQ065890|China|2010-10 -> JQ065890_China_2010-10
+JQ065891|China|2010-10 -> JQ065891_China_2010-10
+JQ065892|China|2010-10 -> JQ065892_China_2010-10
+GU013528|Sri-Lanka|2008-03 -> GU013528_Sri-Lanka_2008-03
+GU013529|Sri-Lanka|2008-03 -> GU013529_Sri-Lanka_2008-03
+GU013530|Sri-Lanka|2008-04 -> GU013530_Sri-Lanka_2008-04
+GU189061|Sri-Lanka|2006 -> GU189061_Sri-Lanka_2006
+GU199350|China|2008 -> GU199350_China_2008
+GU199353|China|2008 -> GU199353_China_2008
+GU301780|Thailand|2008-10-21 -> GU301780_Thailand_2008-10-21
+KX009167|Thailand|2013 -> KX009167_Thailand_2013
+KX009171|Thailand|2013 -> KX009171_Thailand_2013
+KF283986|Comoros|2005 -> KF283986_Comoros_2005
+KF283987|Comoros|2005 -> KF283987_Comoros_2005
+MK935343|Democratic-Republic-of-the-Congo|2019-03-20 -> MK935343_Democratic-Republic-of-the-Congo_2019-03-20
+MK935344|Democratic-Republic-of-the-Congo|2019-03-05 -> MK935344_Democratic-Republic-of-the-Congo_2019-03-05
+KX228391|Brazil|2016-03-03 -> KX228391_Brazil_2016-03-03
+KX262989|Italy|2007 -> KX262989_Italy_2007
+KX262993|Italy|2007 -> KX262993_Italy_2007
+KX262996|Cameroon|2006 -> KX262996_Cameroon_2006
+KX262997|Malaysia|2009 -> KX262997_Malaysia_2009
+MK028836|Comoros|2005 -> MK028836_Comoros_2005
+MK028838|Sri-Lanka|2006 -> MK028838_Sri-Lanka_2006
+MK086029|Sri-Lanka|2006-11-14 -> MK086029_Sri-Lanka_2006-11-14
+AB455493|Sri-Lanka|2006 -> AB455493_Sri-Lanka_2006
+KY038946|Central-African-Republic|1975-06 -> KY038946_Central-African-Republic_1975-06
+KY038947|Central-African-Republic|1983-12 -> KY038947_Central-African-Republic_1983-12
+EU564334|Mauritius|2006-02-14 -> EU564334_Mauritius_2006-02-14
+EU564335|India|2006-10-31 -> EU564335_India_2006-10-31
+MK120201|Italy|2007-08-20 -> MK120201_Italy_2007-08-20
+AB455494|Sri-Lanka|2006 -> AB455494_Sri-Lanka_2006
+MK120202|Italy|2007-08-25 -> MK120202_Italy_2007-08-25
+HM045784|Central-African-Republic|1984-11-19 -> HM045784_Central-African-Republic_1984-11-19
+HM045794|USA|2006 -> HM045794_USA_2006
+HM045799|Sri-Lanka|2007 -> HM045799_Sri-Lanka_2007
+HM045801|Sri-Lanka|2007 -> HM045801_Sri-Lanka_2007
+HM045812|Uganda|1982 -> HM045812_Uganda_1982
+HM045822|Central-African-Republic|1978-10 -> HM045822_Central-African-Republic_1978-10
+HM045823|Angola|1962 -> HM045823_Angola_1962
+KY575567|USA|2006 -> KY575567_USA_2006
+KY575568|USA|2006 -> KY575568_USA_2006
+KY575570|USA|2008 -> KY575570_USA_2008
+KY575571|USA|2006 -> KY575571_USA_2006
+KY575574|USA|1995 -> KY575574_USA_1995
+MT636922|Democratic-Republic-of-the-Congo|2019-03-22 -> MT636922_Democratic-Republic-of-the-Congo_2019-03-22
+MW161454|Sudan|2018-10 -> MW161454_Sudan_2018-10
+MW161453|Sudan|2018-10 -> MW161453_Sudan_2018-10
+MW161451|Sudan|2018-10 -> MW161451_Sudan_2018-10
+MW161450|Sudan|2018-10 -> MW161450_Sudan_2018-10
+MW161449|Sudan|2018-10 -> MW161449_Sudan_2018-10
+MW161448|Sudan|2018-10 -> MW161448_Sudan_2018-10
+MW161447|Sudan|2018-10 -> MW161447_Sudan_2018-10
+MW161416|Sudan|2018-10 -> MW161416_Sudan_2018-10
+MW161415|Sudan|2018-10 -> MW161415_Sudan_2018-10
+MW161414|Sudan|2018-10 -> MW161414_Sudan_2018-10
+MW161413|Sudan|2018-10 -> MW161413_Sudan_2018-10
+MW161412|Sudan|2018-10 -> MW161412_Sudan_2018-10
+MW161411|Sudan|2018-10 -> MW161411_Sudan_2018-10
+MW161410|Sudan|2018-10 -> MW161410_Sudan_2018-10
+MW161408|Sudan|2018-10 -> MW161408_Sudan_2018-10
+MW161407|Sudan|2018-10 -> MW161407_Sudan_2018-10
+MW161406|Sudan|2018-10 -> MW161406_Sudan_2018-10
+MW161372|Sudan|2018-10 -> MW161372_Sudan_2018-10
+MW161370|Sudan|2018-10 -> MW161370_Sudan_2018-10
+MW161368|Sudan|2018-10 -> MW161368_Sudan_2018-10
+MW161367|Sudan|2018-10 -> MW161367_Sudan_2018-10
+MW161366|Sudan|2018-10 -> MW161366_Sudan_2018-10
+MW161365|Sudan|2018-10 -> MW161365_Sudan_2018-10
+MW161364|Sudan|2018-10 -> MW161364_Sudan_2018-10
+MT666073|Cameroon|2018-06-28 -> MT666073_Cameroon_2018-06-28
+MT666072|Cameroon|2016-10-20 -> MT666072_Cameroon_2016-10-20
+MT666071|Cameroon|2018-09-17 -> MT666071_Cameroon_2018-09-17
+MK473639|India|2016-10-23 -> MK473639_India_2016-10-23
+MW281311|France|2017-09-12 -> MW281311_France_2017-09-12
+MK473640|India|2016-10-18 -> MK473640_India_2016-10-18
+KY704939|Brazil|2016-04-17 -> KY704939_Brazil_2016-04-17
+ON642355|India|2010 -> ON642355_India_2010
+ON642354|India|2010 -> ON642354_India_2010
+OP312942|Brazil|27-Mar-2018 -> OP312942_Brazil_27-Mar-2018
+OQ750692|India|2010 -> OQ750692_India_2010
+OQ750695|India|2010 -> OQ750695_India_2010
+OQ750693|India|2010 -> OQ750693_India_2010
+OQ750694|India|2010 -> OQ750694_India_2010
+OR037306|China|2018 -> OR037306_China_2018
+OQ148629|Brazil|28-Aug-2014 -> OQ148629_Brazil_28-Aug-2014
+OQ148630|Brazil|10-Oct-2014 -> OQ148630_Brazil_10-Oct-2014
+OQ148648|Brazil|04-Sep-2016 -> OQ148648_Brazil_04-Sep-2016
+OP168354|Myanmar|Jul-2019 -> OP168354_Myanmar_Jul-2019
+OP168357|Myanmar|Jul-2019 -> OP168357_Myanmar_Jul-2019
+OP168356|Myanmar|Jul-2019 -> OP168356_Myanmar_Jul-2019
+OP168355|Myanmar|Jul-2019 -> OP168355_Myanmar_Jul-2019
+OP168359|Myanmar|Jul-2019 -> OP168359_Myanmar_Jul-2019
+OP168361|Myanmar|Jul-2019 -> OP168361_Myanmar_Jul-2019
+OP168360|Myanmar|Jul-2019 -> OP168360_Myanmar_Jul-2019
+OP168362|Myanmar|Jul-2019 -> OP168362_Myanmar_Jul-2019
+OP168358|Myanmar|Jul-2019 -> OP168358_Myanmar_Jul-2019
+OP168364|Myanmar|Jul-2019 -> OP168364_Myanmar_Jul-2019
+OP168365|Myanmar|Jul-2019 -> OP168365_Myanmar_Jul-2019
+OP168366|Myanmar|Jul-2019 -> OP168366_Myanmar_Jul-2019
+OP168368|Myanmar|Jul-2019 -> OP168368_Myanmar_Jul-2019
+OP168363|Myanmar|Jul-2019 -> OP168363_Myanmar_Jul-2019
+OP168367|Myanmar|Jul-2019 -> OP168367_Myanmar_Jul-2019
+OP168369|Myanmar|Jul-2019 -> OP168369_Myanmar_Jul-2019
+OP168370|Myanmar|Jul-2019 -> OP168370_Myanmar_Jul-2019
+PP336993|Brazil|28-Apr-2016 -> PP336993_Brazil_28-Apr-2016
+PP336995|Brazil|28-Apr-2016 -> PP336995_Brazil_28-Apr-2016
+PP337001|Brazil|07-Apr-2016 -> PP337001_Brazil_07-Apr-2016
+PP337003|Brazil|08-Apr-2016 -> PP337003_Brazil_08-Apr-2016
+PP337009|Brazil|08-Apr-2016 -> PP337009_Brazil_08-Apr-2016
+PP337010|Brazil|28-Apr-2016 -> PP337010_Brazil_28-Apr-2016
+PP349434|India|2006 -> PP349434_India_2006
+
+                                                      Gap/Ambiguity  Composition  p-value
+   1  CHIKV_RUN_S12b41_2024                                   0.00%    passed     98.71%
+   2  CHIKV_RUN_S8b01_2024                                    0.00%    passed     98.71%
+   3  CHIKV_RUN_S8b06_2024                                    0.00%    passed     98.71%
+   4  CHIKV_RUN_S9b21_2025                                    0.00%    passed     98.71%
+   5  CHIKV_RUN_S12b11_2025                                   0.00%    passed     98.71%
+   6  CHIKV_RUN_S12b13_2025                                   0.00%    passed     98.71%
+   7  CHIKV_RUN_S17b16_2025                                   0.00%    passed     98.71%
+   8  CHIKV_RUN_S8b03_2024                                    0.00%    passed     98.71%
+   9  CHIKV_RUN_S37b33_2025                                   0.00%    passed     98.71%
+  10  CHIKV_RUN_S4b3_2024                                     0.00%    passed     98.71%
+  11  CHIKV_RUN_S06b01_2024                                   0.00%    passed     98.71%
+  12  CHIKV_RUN_S2b93_2024                                    0.00%    passed     98.71%
+  13  CHIKV_RUN_S3b83_2024                                    0.00%    passed     98.71%
+  14  CHIKV_RUN_S3b82_2024                                    0.00%    passed     98.71%
+  15  CHIKV_RUN_S2b92_2024                                    0.00%    passed     98.71%
+  16  CHIKV_RUN_S39b32_2025                                   9.20%    passed     81.45%
+  17  CHIKV_RUN_S8b57_2025                                    0.00%    passed     98.90%
+  18  CHIKV_RUN_S15b22_2025                                   0.00%    passed     98.90%
+  19  CHIKV_RUN_S52b49_2025                                   0.00%    passed     98.90%
+  20  CHIKV_RUN_S5b06_2024                                    0.00%    passed     98.90%
+  21  CHIKV_RUN_S31b19_2025                                   0.00%    passed     98.70%
+  22  CHIKV_RUN_S23b06_2025                                   9.20%    passed     80.90%
+  23  CHIKV_RUN_S13b06_2025                                   0.00%    passed     99.21%
+  24  CHIKV_RUN_S10b64_2025                                   0.00%    passed     98.90%
+  25  CHIKV_RUN_S8b26_2024                                    0.00%    passed     98.51%
+  26  CHIKV_RUN_S35b83_2025                                   0.00%    passed     98.70%
+  27  CHIKV_RUN_S48b40_2025                                   0.00%    passed     98.47%
+  28  CHIKV_RUN_S53b32_2025                                   0.01%    passed     98.62%
+  29  CHIKV_RUN_S12b23_2025                                   2.83%    passed     96.09%
+  30  CHIKV_RUN_S47b30_2025                                   0.00%    passed     98.89%
+  31  CHIKV_RUN_S8b07_2024                                    0.00%    passed     98.50%
+  32  CHIKV_RUN_S12b28_2025                                   0.00%    passed     98.27%
+  33  CHIKV_RUN_S18b71_2025                                   0.00%    passed     98.70%
+  34  CHIKV_RUN_S14b45_2025                                   0.00%    passed     98.70%
+  35  CHIKV_RUN_S50b94_2025                                   0.00%    passed     99.06%
+  36  CHIKV_RUN_S15b27_2025                                   8.93%    passed     71.20%
+  37  CHIKV_RUN_S20b14_2025                                   0.00%    passed     98.69%
+  38  CHIKV_RUN_S44b07_2025                                   0.04%    passed     98.29%
+  39  CHIKV_RUN_S52b74_2025                                   0.00%    passed     98.23%
+  40  CHIKV_RUN_S53b69_2025                                   0.00%    passed     98.51%
+  41  CHIKV_RUN_S54b41_2025                                   0.00%    passed     98.90%
+  42  CHIKV_RUN_S32b49_2025                                   0.00%    passed     98.90%
+  43  CHIKV_RUN_S47b23_2025                                   0.00%    passed     98.29%
+  44  CHIKV_RUN_S54b42_2025                                   0.00%    passed     99.20%
+  45  CHIKV_RUN_S10b29_2025                                   0.00%    passed     98.89%
+  46  CHIKV_RUN_S23b74_2025                                   0.00%    passed     98.69%
+  47  CHIKV_RUN_S54b46_2025                                   0.20%    passed     98.63%
+  48  CHIKV_RUN_S48b53_2025                                   0.01%    passed     98.60%
+  49  CHIKV_RUN_S54b44_2025                                   0.00%    passed     98.70%
+  50  CHIKV_RUN_S41b79_2025                                   0.00%    passed     98.51%
+  51  CHIKV_RUN_S54b35_2025                                   0.00%    passed     98.70%
+  52  CHIKV_RUN_S47b16_2025                                   0.00%    passed     98.51%
+  53  CHIKV_RUN_S54b48_2025                                   0.00%    passed     98.50%
+  54  KJ941050_USA_2006                                       0.04%    passed     99.79%
+  55  FJ445426_Sri-Lanka_2008-04                              0.00%    passed     99.96%
+  56  FJ445427_Sri-Lanka_2007-07                              0.00%    passed     99.90%
+  57  FJ445428_Sri-Lanka_2007-05                              0.00%    passed     99.97%
+  58  FJ445430_Singapore_2008-07                              0.00%    passed     99.97%
+  59  FJ445431_Singapore_2008-07                              0.00%    passed     99.97%
+  60  KP003807_France_2006                                    0.02%    passed     99.60%
+  61  FJ445432_Singapore_2008-07                              0.00%    passed     99.96%
+  62  FJ445433_Singapore_2008-08                              0.00%    passed     99.96%
+  63  KP003808_Madagascar_2006                                0.00%    passed     99.12%
+  64  KP003809_Mayotte_2006                                   0.00%    passed     98.98%
+  65  KP003810_Italy_2007                                     0.00%    passed     99.90%
+  66  KP003811_Italy_2007                                     0.00%    passed     99.93%
+  67  KP003812_Gabon_2007                                     0.00%    passed     99.37%
+  68  KP003813_Democratic-Republic-of-the-Congo_2011          0.22%    passed     99.69%
+  69  FJ445443_Singapore_2008-08                              0.00%    passed     99.97%
+  70  KP164568_Brazil_2014-08-26                              0.00%    passed     99.96%
+  71  KP164569_Brazil_2014-08-28                              0.00%    passed     99.98%
+  72  FJ445445_Singapore_2008-08                              0.00%    passed     99.95%
+  73  KP164570_Brazil_2014-09-03                              0.02%    passed     99.96%
+  74  FJ445463_Singapore_2008-07                              0.00%    passed     99.97%
+  75  KP702297_Comoros_2005                                   1.27%    passed     96.73%
+  76  FJ445484_Singapore_2008-05                              0.00%    passed     99.97%
+  77  FJ445502_Singapore_2008-08                              0.00%    passed     99.96%
+  78  FJ445510_Singapore_2008-01                              0.00%    passed     99.91%
+  79  FJ445511_Singapore_2008-01                              0.00%    passed     99.91%
+  80  FJ513628_Sri-Lanka_2008-03                              0.00%    passed     99.94%
+  81  FJ513629_Sri-Lanka_2008-03                              0.00%    passed     99.87%
+  82  FJ513632_Sri-Lanka_2008-03                              0.00%    passed     99.97%
+  83  FJ513635_Sri-Lanka_2008-03                              0.00%    passed     99.79%
+  84  FJ513637_Sri-Lanka_2008-03                              0.00%    passed     99.66%
+  85  FJ513645_Sri-Lanka_2008-04                              0.00%    passed     99.86%
+  86  KC614648_Yemen_2011-01-25                               0.11%    passed     99.99%
+  87  FJ513654_Sri-Lanka_2008-04                              0.00%    passed     99.92%
+  88  FJ513657_Sri-Lanka_2008-04                              0.00%    passed     99.90%
+  89  FJ513673_Sri-Lanka_2008-04                              0.00%    passed     99.91%
+  90  FJ513675_Sri-Lanka_2008-04                              0.00%    passed     99.91%
+  91  FJ513679_Sri-Lanka_2008-04                              0.00%    passed     99.97%
+  92  MT636907_Democratic-Republic-of-the-Congo_2019-01-07    0.00%    passed     99.33%
+  93  MT636908_Democratic-Republic-of-the-Congo_2019-01-07    0.00%    passed     99.47%
+  94  MT636909_Democratic-Republic-of-the-Congo_2019-01-21    0.00%    passed     99.22%
+  95  MT636910_Democratic-Republic-of-the-Congo_2019-01-21    0.00%    passed     99.36%
+  96  MT636911_Democratic-Republic-of-the-Congo_2019-01-21    0.00%    passed     99.40%
+  97  MT636912_Democratic-Republic-of-the-Congo_2019-02-01    0.00%    passed     99.62%
+  98  MT636913_Democratic-Republic-of-the-Congo_2019-02-06    0.00%    passed     99.34%
+  99  MT636914_Democratic-Republic-of-the-Congo_2019-03-26    0.00%    passed     99.62%
+ 100  MT636916_Democratic-Republic-of-the-Congo_2019-03-26    0.00%    passed     99.62%
+ 101  MT636917_Democratic-Republic-of-the-Congo_2019-03-21    0.00%    passed     99.47%
+ 102  MT636918_Democratic-Republic-of-the-Congo_2019-02       0.00%    passed     99.60%
+ 103  MT636919_Democratic-Republic-of-the-Congo_2019-03-20    0.00%    passed     99.31%
+ 104  MT636921_Democratic-Republic-of-the-Congo_2019-03-21    0.00%    passed     99.47%
+ 105  FJ807896_Singapore_2006                                 0.00%    passed     99.92%
+ 106  FJ807898_Bangladesh_2008                                0.00%    passed     99.97%
+ 107  FJ959103_Mauritius_2006                                 0.00%    passed     99.62%
+ 108  KT324225_Malaysia_2009-01                               0.00%    passed     99.97%
+ 109  KT324227_Malaysia_2009-03                               0.00%    passed     99.97%
+ 110  FN295485_Malaysia_2008                                  0.00%    passed     99.86%
+ 111  FN295487_Malaysia_2008                                  0.00%    passed     99.93%
+ 112  KT336777_India_2009-04-08                               0.00%    passed     99.84%
+ 113  FR687345_Malaysia_2009-02-05                            0.00%    passed     99.93%
+ 114  FR687347_Malaysia_2009-02-12                            0.00%    passed     99.96%
+ 115  FR717336_France_2005-12-26                              0.00%    passed     99.37%
+ 116  FR717337_France_2005-12-26                              0.00%    passed     99.37%
+ 117  JF274082_India_2006-09-27                               0.00%    passed     99.87%
+ 118  EF210157_India_2006                                     0.00%    passed     99.85%
+ 119  MH000700_Brazil_2016-02-04                              0.00%    passed     99.72%
+ 120  MH000703_Brazil_2016-02-15                              0.00%    passed     99.72%
+ 121  MH000706_Brazil_2016-02-18                              0.00%    passed     99.81%
+ 122  MH124571_India_2010                                     0.03%    passed     99.95%
+ 123  MH124572_India_2010                                     0.11%    passed     99.85%
+ 124  MH124573_India_2010                                     0.13%    passed     99.86%
+ 125  MH124574_India_2010                                     0.79%    passed     99.95%
+ 126  MH124575_India_2010                                     0.18%    passed     99.94%
+ 127  MH124576_India_2010                                     0.38%    passed    100.00%
+ 128  MH124577_India_2010                                     0.45%    passed     99.97%
+ 129  MH124578_India_2010                                     0.01%    passed     99.96%
+ 130  MH124579_India_2010                                     0.00%    passed     99.96%
+ 131  MH229986_Mauritius_2006                                 0.11%    passed     99.65%
+ 132  MK690206_Democratic-Republic-of-the-Congo_2019          0.00%    passed     99.84%
+ 133  KU940225_Brazil_2015-07-15                              0.00%    passed     99.96%
+ 134  MH647212_Singapore_2009-11                              0.00%    passed     99.90%
+ 135  MH647214_Singapore_2010-01                              0.00%    passed     99.79%
+ 136  MH647215_Singapore_2010-02                              0.00%    passed     99.86%
+ 137  GQ428210_India_2006-10-07                               0.00%    passed     99.77%
+ 138  GQ428211_India_2006-10-07                               0.00%    passed     99.97%
+ 139  GQ428213_India_2007-07-13                               0.00%    passed     99.78%
+ 140  GQ428215_India_2008-05-29                               0.00%    passed     99.97%
+ 141  EU244823_Italy_2007                                     0.00%    passed     99.94%
+ 142  EU372006_India_2007-06-11                               0.00%    passed     99.96%
+ 143  JQ065890_China_2010-10                                  0.00%    passed     99.93%
+ 144  JQ065891_China_2010-10                                  0.00%    passed     99.96%
+ 145  JQ065892_China_2010-10                                  0.78%    passed     99.14%
+ 146  GU013528_Sri-Lanka_2008-03                              0.00%    passed     99.91%
+ 147  GU013529_Sri-Lanka_2008-03                              0.00%    passed     99.82%
+ 148  GU013530_Sri-Lanka_2008-04                              0.00%    passed     99.85%
+ 149  GU189061_Sri-Lanka_2006                                 0.00%    passed     99.87%
+ 150  GU199350_China_2008                                     0.00%    passed     99.90%
+ 151  GU199353_China_2008                                     0.00%    passed     99.98%
+ 152  GU301780_Thailand_2008-10-21                            0.00%    passed    100.00%
+ 153  KX009167_Thailand_2013                                  0.01%    passed     99.97%
+ 154  KX009171_Thailand_2013                                  0.00%    passed     99.95%
+ 155  KF283986_Comoros_2005                                   0.05%    passed     99.13%
+ 156  KF283987_Comoros_2005                                   0.10%    passed     99.16%
+ 157  MK935343_Democratic-Republic-of-the-Congo_2019-03-20    0.00%    passed     99.84%
+ 158  MK935344_Democratic-Republic-of-the-Congo_2019-03-05    0.00%    passed     99.86%
+ 159  KX228391_Brazil_2016-03-03                              0.00%    passed     99.72%
+ 160  KX262989_Italy_2007                                     0.00%    passed     99.90%
+ 161  KX262993_Italy_2007                                     0.00%    passed     99.85%
+ 162  KX262996_Cameroon_2006                                  0.00%    passed     99.63%
+ 163  KX262997_Malaysia_2009                                  0.00%    passed     99.97%
+ 164  MK028836_Comoros_2005                                   0.10%    passed     98.50%
+ 165  MK028838_Sri-Lanka_2006                                 0.00%    passed     99.91%
+ 166  MK086029_Sri-Lanka_2006-11-14                           0.00%    passed     99.83%
+ 167  AB455493_Sri-Lanka_2006                                 0.00%    passed     99.80%
+ 168  KY038946_Central-African-Republic_1975-06               0.00%    passed     99.34%
+ 169  KY038947_Central-African-Republic_1983-12               0.00%    passed     99.93%
+ 170  EU564334_Mauritius_2006-02-14                           0.35%    passed     99.29%
+ 171  EU564335_India_2006-10-31                               0.00%    passed     99.93%
+ 172  MK120201_Italy_2007-08-20                               0.00%    passed     99.88%
+ 173  AB455494_Sri-Lanka_2006                                 0.00%    passed     99.92%
+ 174  MK120202_Italy_2007-08-25                               0.00%    passed     99.91%
+ 175  HM045784_Central-African-Republic_1984-11-19            0.02%    passed     98.67%
+ 176  HM045794_USA_2006                                       0.01%    passed     99.73%
+ 177  HM045799_Sri-Lanka_2007                                 0.00%    passed     99.89%
+ 178  HM045801_Sri-Lanka_2007                                 0.00%    passed     99.89%
+ 179  HM045812_Uganda_1982                                    0.00%    passed     99.91%
+ 180  HM045822_Central-African-Republic_1978-10               0.01%    passed     99.35%
+ 181  HM045823_Angola_1962                                    0.00%    passed     99.92%
+ 182  KY575567_USA_2006                                       0.00%    passed     99.95%
+ 183  KY575568_USA_2006                                       0.00%    passed     99.83%
+ 184  KY575570_USA_2008                                       0.00%    passed     99.93%
+ 185  KY575571_USA_2006                                       0.00%    passed     99.25%
+ 186  KY575574_USA_1995                                       0.00%    passed     99.62%
+ 187  MT636922_Democratic-Republic-of-the-Congo_2019-03-22    0.00%    passed     99.47%
+ 188  MW161454_Sudan_2018-10                                  5.00%    passed     92.84%
+ 189  MW161453_Sudan_2018-10                                  4.92%    passed     87.49%
+ 190  MW161451_Sudan_2018-10                                  4.82%    passed     92.26%
+ 191  MW161450_Sudan_2018-10                                  3.88%    passed     92.54%
+ 192  MW161449_Sudan_2018-10                                  3.84%    passed     95.84%
+ 193  MW161448_Sudan_2018-10                                  3.18%    passed     90.64%
+ 194  MW161447_Sudan_2018-10                                  3.85%    passed     93.62%
+ 195  MW161416_Sudan_2018-10                                  4.25%    passed     85.37%
+ 196  MW161415_Sudan_2018-10                                  1.63%    passed     98.86%
+ 197  MW161414_Sudan_2018-10                                  1.55%    passed     98.64%
+ 198  MW161413_Sudan_2018-10                                  2.26%    passed     78.81%
+ 199  MW161412_Sudan_2018-10                                  3.17%    passed     93.73%
+ 200  MW161411_Sudan_2018-10                                  1.48%    passed     96.42%
+ 201  MW161410_Sudan_2018-10                                  1.52%    passed     94.10%
+ 202  MW161408_Sudan_2018-10                                  3.94%    passed     92.21%
+ 203  MW161407_Sudan_2018-10                                  1.46%    passed     96.11%
+ 204  MW161406_Sudan_2018-10                                  1.46%    passed     96.69%
+ 205  MW161372_Sudan_2018-10                                  1.49%    passed     98.70%
+ 206  MW161370_Sudan_2018-10                                  1.42%    passed     96.24%
+ 207  MW161368_Sudan_2018-10                                  1.40%    passed     98.98%
+ 208  MW161367_Sudan_2018-10                                  1.58%    passed     95.12%
+ 209  MW161366_Sudan_2018-10                                  1.58%    passed     94.94%
+ 210  MW161365_Sudan_2018-10                                  1.60%    passed     92.32%
+ 211  MW161364_Sudan_2018-10                                  3.46%    passed     87.12%
+ 212  MT666073_Cameroon_2018-06-28                            0.00%    passed     99.78%
+ 213  MT666072_Cameroon_2016-10-20                            0.00%    passed     99.32%
+ 214  MT666071_Cameroon_2018-09-17                            0.00%    passed     99.08%
+ 215  MK473639_India_2016-10-23                               3.00%    passed     78.21%
+ 216  MW281311_France_2017-09-12                              0.00%    passed     99.91%
+ 217  MK473640_India_2016-10-18                               0.83%    passed     99.52%
+ 218  KY704939_Brazil_2016-04-17                              0.51%    passed     99.99%
+ 219  ON642355_India_2010                                     0.52%    passed     99.99%
+ 220  ON642354_India_2010                                     0.66%    passed     99.99%
+ 221  OP312942_Brazil_27-Mar-2018                             3.30%    passed     96.56%
+ 222  OQ750692_India_2010                                     0.00%    passed     99.82%
+ 223  OQ750695_India_2010                                     0.41%    passed     99.48%
+ 224  OQ750693_India_2010                                     0.79%    passed     99.52%
+ 225  OQ750694_India_2010                                     0.00%    passed     99.80%
+ 226  OR037306_China_2018                                     0.00%    passed     99.87%
+ 227  OQ148629_Brazil_28-Aug-2014                             0.00%    passed     99.96%
+ 228  OQ148630_Brazil_10-Oct-2014                             0.00%    passed     99.93%
+ 229  OQ148648_Brazil_04-Sep-2016                             0.00%    passed     99.95%
+ 230  OP168354_Myanmar_Jul-2019                               1.25%    passed     97.50%
+ 231  OP168357_Myanmar_Jul-2019                               1.19%    passed     97.42%
+ 232  OP168356_Myanmar_Jul-2019                               1.13%    passed     97.61%
+ 233  OP168355_Myanmar_Jul-2019                               1.12%    passed     97.36%
+ 234  OP168359_Myanmar_Jul-2019                               1.10%    passed     97.82%
+ 235  OP168361_Myanmar_Jul-2019                               0.98%    passed     98.32%
+ 236  OP168360_Myanmar_Jul-2019                               0.98%    passed     98.92%
+ 237  OP168362_Myanmar_Jul-2019                               1.21%    passed     97.04%
+ 238  OP168358_Myanmar_Jul-2019                               1.11%    passed     97.89%
+ 239  OP168364_Myanmar_Jul-2019                               0.91%    passed     99.09%
+ 240  OP168365_Myanmar_Jul-2019                               1.09%    passed     98.18%
+ 241  OP168366_Myanmar_Jul-2019                               1.35%    passed     97.63%
+ 242  OP168368_Myanmar_Jul-2019                               1.11%    passed     97.78%
+ 243  OP168363_Myanmar_Jul-2019                               0.96%    passed     98.75%
+ 244  OP168367_Myanmar_Jul-2019                               1.10%    passed     98.10%
+ 245  OP168369_Myanmar_Jul-2019                               1.12%    passed     97.90%
+ 246  OP168370_Myanmar_Jul-2019                               1.08%    passed     98.59%
+ 247  PP336993_Brazil_28-Apr-2016                             3.74%    passed     96.68%
+ 248  PP336995_Brazil_28-Apr-2016                             4.25%    passed     92.87%
+ 249  PP337001_Brazil_07-Apr-2016                             2.95%    passed     98.55%
+ 250  PP337003_Brazil_08-Apr-2016                             2.65%    passed     98.36%
+ 251  PP337009_Brazil_08-Apr-2016                             2.93%    passed     98.56%
+ 252  PP337010_Brazil_28-Apr-2016                             2.94%    passed     98.63%
+ 253  PP349434_India_2006                                     0.00%    passed     99.78%
+****  TOTAL                                                   0.59%  0 sequences failed composition chi2 test (p-value<5%; df=3)
+NOTE: CHIKV_RUN_S8b01_2024 is identical to CHIKV_RUN_S12b41_2024 but kept for subsequent analysis
+NOTE: CHIKV_RUN_S15b22_2025 is identical to CHIKV_RUN_S8b57_2025 but kept for subsequent analysis
+NOTE: CHIKV_RUN_S14b45_2025 is identical to CHIKV_RUN_S18b71_2025 but kept for subsequent analysis
+NOTE: FJ445484_Singapore_2008-05 is identical to FJ445443_Singapore_2008-08 but kept for subsequent analysis
+NOTE: OQ148629_Brazil_28-Aug-2014 is identical to KP164568_Brazil_2014-08-26 but kept for subsequent analysis
+NOTE: FJ445511_Singapore_2008-01 is identical to FJ445510_Singapore_2008-01 but kept for subsequent analysis
+NOTE: MT636916_Democratic-Republic-of-the-Congo_2019-03-26 is identical to MT636914_Democratic-Republic-of-the-Congo_2019-03-26 but kept for subsequent analysis
+NOTE: MT636922_Democratic-Republic-of-the-Congo_2019-03-22 is identical to MT636921_Democratic-Republic-of-the-Congo_2019-03-21 but kept for subsequent analysis
+NOTE: FR717337_France_2005-12-26 is identical to FR717336_France_2005-12-26 but kept for subsequent analysis
+NOTE: KX228391_Brazil_2016-03-03 is identical to MH000700_Brazil_2016-02-04 but kept for subsequent analysis
+NOTE: 15 identical sequences (see below) will be ignored for subsequent analysis
+NOTE: CHIKV_RUN_S8b06_2024 (identical to CHIKV_RUN_S12b41_2024) is ignored but added at the end
+NOTE: CHIKV_RUN_S9b21_2025 (identical to CHIKV_RUN_S12b41_2024) is ignored but added at the end
+NOTE: CHIKV_RUN_S12b11_2025 (identical to CHIKV_RUN_S12b41_2024) is ignored but added at the end
+NOTE: CHIKV_RUN_S12b13_2025 (identical to CHIKV_RUN_S12b41_2024) is ignored but added at the end
+NOTE: CHIKV_RUN_S17b16_2025 (identical to CHIKV_RUN_S12b41_2024) is ignored but added at the end
+NOTE: CHIKV_RUN_S8b03_2024 (identical to CHIKV_RUN_S12b41_2024) is ignored but added at the end
+NOTE: CHIKV_RUN_S37b33_2025 (identical to CHIKV_RUN_S12b41_2024) is ignored but added at the end
+NOTE: CHIKV_RUN_S4b3_2024 (identical to CHIKV_RUN_S12b41_2024) is ignored but added at the end
+NOTE: CHIKV_RUN_S06b01_2024 (identical to CHIKV_RUN_S12b41_2024) is ignored but added at the end
+NOTE: CHIKV_RUN_S2b93_2024 (identical to CHIKV_RUN_S12b41_2024) is ignored but added at the end
+NOTE: CHIKV_RUN_S3b83_2024 (identical to CHIKV_RUN_S12b41_2024) is ignored but added at the end
+NOTE: CHIKV_RUN_S3b82_2024 (identical to CHIKV_RUN_S12b41_2024) is ignored but added at the end
+NOTE: CHIKV_RUN_S2b92_2024 (identical to CHIKV_RUN_S12b41_2024) is ignored but added at the end
+NOTE: CHIKV_RUN_S52b49_2025 (identical to CHIKV_RUN_S8b57_2025) is ignored but added at the end
+NOTE: CHIKV_RUN_S5b06_2024 (identical to CHIKV_RUN_S8b57_2025) is ignored but added at the end
+
+For your convenience alignment with unique sequences printed to Alignment_101025.fas.uniqueseq.phy
+
+
+Create initial parsimony tree by phylogenetic likelihood library (PLL)... 0.018 seconds
+NOTE: ModelFinder requires 134 MB RAM!
+ModelFinder will test 13 DNA models (sample size: 11172) ...
+ No. Model         -LnL         df  AIC          AICc         BIC
+  1  GTR+F         29030.587    481 59023.174    59066.549    62544.655
+  2  GTR+F+I       28807.306    482 58578.611    58622.171    62107.413
+  3  GTR+F+G4      28799.289    482 58562.578    58606.138    62091.380
+  4  GTR+F+I+G4    28789.532    483 58545.063    58588.808    62081.186
+  5  GTR+F+R2      28777.591    483 58521.182    58564.927    62057.306
+  6  GTR+F+R3      28772.705    485 58515.411    58559.526    62066.176
+Akaike Information Criterion:           GTR+F+R3
+Corrected Akaike Information Criterion: GTR+F+R3
+Bayesian Information Criterion:         GTR+F+R2
+Best-fit model: GTR+F+R2 chosen according to BIC
+
+All model information printed to Alignment_101025.fas.model.gz
+CPU time for ModelFinder: 79.665 seconds (0h:1m:19s)
+Wall-clock time for ModelFinder: 20.120 seconds (0h:0m:20s)
+
+NOTE: 26 MB RAM (0 GB) is required!
+Estimate model parameters (epsilon = 0.100)
+1. Initial log-likelihood: -30235.813
+2. Current log-likelihood: -28948.861
+3. Current log-likelihood: -28900.733
+4. Current log-likelihood: -28894.522
+5. Current log-likelihood: -28888.208
+6. Current log-likelihood: -28881.815
+7. Current log-likelihood: -28875.368
+8. Current log-likelihood: -28868.898
+9. Current log-likelihood: -28862.849
+10. Current log-likelihood: -28857.374
+11. Current log-likelihood: -28851.966
+12. Current log-likelihood: -28846.593
+13. Current log-likelihood: -28841.291
+14. Current log-likelihood: -28836.089
+15. Current log-likelihood: -28831.018
+16. Current log-likelihood: -28826.166
+17. Current log-likelihood: -28821.550
+18. Current log-likelihood: -28817.205
+19. Current log-likelihood: -28813.174
+20. Current log-likelihood: -28809.488
+21. Current log-likelihood: -28806.209
+22. Current log-likelihood: -28803.365
+23. Current log-likelihood: -28800.951
+24. Current log-likelihood: -28798.902
+25. Current log-likelihood: -28797.192
+26. Current log-likelihood: -28795.780
+27. Current log-likelihood: -28794.617
+28. Current log-likelihood: -28793.668
+29. Current log-likelihood: -28792.877
+30. Current log-likelihood: -28792.226
+31. Current log-likelihood: -28791.673
+32. Current log-likelihood: -28791.190
+33. Current log-likelihood: -28790.748
+34. Current log-likelihood: -28790.329
+35. Current log-likelihood: -28789.909
+36. Current log-likelihood: -28789.496
+37. Current log-likelihood: -28789.079
+38. Current log-likelihood: -28788.672
+39. Current log-likelihood: -28788.262
+40. Current log-likelihood: -28787.860
+41. Current log-likelihood: -28787.455
+42. Current log-likelihood: -28787.062
+43. Current log-likelihood: -28786.666
+44. Current log-likelihood: -28786.277
+45. Current log-likelihood: -28785.887
+46. Current log-likelihood: -28785.511
+47. Current log-likelihood: -28785.136
+48. Current log-likelihood: -28784.768
+49. Current log-likelihood: -28784.402
+50. Current log-likelihood: -28784.046
+51. Current log-likelihood: -28783.691
+52. Current log-likelihood: -28783.347
+53. Current log-likelihood: -28783.007
+54. Current log-likelihood: -28782.680
+55. Current log-likelihood: -28782.355
+56. Current log-likelihood: -28782.043
+57. Current log-likelihood: -28781.733
+58. Current log-likelihood: -28781.436
+59. Current log-likelihood: -28781.142
+60. Current log-likelihood: -28780.861
+61. Current log-likelihood: -28780.584
+62. Current log-likelihood: -28780.320
+63. Current log-likelihood: -28780.060
+64. Current log-likelihood: -28779.814
+65. Current log-likelihood: -28779.574
+66. Current log-likelihood: -28779.346
+67. Current log-likelihood: -28779.123
+68. Current log-likelihood: -28778.914
+69. Current log-likelihood: -28778.710
+70. Current log-likelihood: -28778.519
+71. Current log-likelihood: -28778.334
+72. Current log-likelihood: -28778.161
+73. Current log-likelihood: -28777.994
+74. Current log-likelihood: -28777.838
+75. Current log-likelihood: -28777.688
+76. Current log-likelihood: -28777.551
+77. Current log-likelihood: -28777.418
+78. Current log-likelihood: -28777.296
+79. Current log-likelihood: -28777.178
+80. Current log-likelihood: -28777.070
+81. Current log-likelihood: -28776.967
+Optimal log-likelihood: -28776.854
+Rate parameters:  A-C: 1.84459  A-G: 11.88591  A-T: 2.07293  C-G: 0.32352  C-T: 30.84445  G-T: 1.00000
+Base frequencies:  A: 0.290  C: 0.252  G: 0.257  T: 0.201
+Site proportion and rates:  (0.914,0.497) (0.086,6.355)
+Parameters optimization took 81 rounds (7.902 sec)
+Computing ML distances based on estimated model parameters... 0.865 sec
+Computing BIONJ tree...
+0.017 seconds
+Log-likelihood of BIONJ tree: -29034.357
+--------------------------------------------------------------------
+|             INITIALIZING CANDIDATE TREE SET                      |
+--------------------------------------------------------------------
+Generating 98 parsimony trees... 2.006 second
+Computing log-likelihood of 98 initial trees ... 2.968 seconds
+Current best score: -28776.854
+
+Do NNI search on 20 best initial trees
+Estimate model parameters (epsilon = 0.100)
+BETTER TREE FOUND at iteration 1: -28769.078
+Iteration 10 / LogL: -28788.135 / Time: 0h:0m:17s
+Iteration 20 / LogL: -28780.735 / Time: 0h:0m:21s
+Finish initializing candidate tree set (20)
+Current best tree score: -28769.078 / CPU time: 12.860
+Number of iterations: 20
+--------------------------------------------------------------------
+|               OPTIMIZING CANDIDATE TREE SET                      |
+--------------------------------------------------------------------
+Iteration 30 / LogL: -28774.845 / Time: 0h:0m:24s (0h:1m:0s left)
+Iteration 40 / LogL: -28769.444 / Time: 0h:0m:27s (0h:0m:43s left)
+Iteration 50 / LogL: -28777.020 / Time: 0h:0m:31s (0h:0m:32s left)
+Iteration 60 / LogL: -28769.524 / Time: 0h:0m:34s (0h:0m:23s left)
+Iteration 70 / LogL: -28769.440 / Time: 0h:0m:38s (0h:0m:17s left)
+Iteration 80 / LogL: -28769.382 / Time: 0h:0m:41s (0h:0m:11s left)
+Iteration 90 / LogL: -28776.140 / Time: 0h:0m:45s (0h:0m:5s left)
+Iteration 100 / LogL: -28772.280 / Time: 0h:0m:49s (0h:0m:0s left)
+TREE SEARCH COMPLETED AFTER 102 ITERATIONS / Time: 0h:0m:49s
+
+--------------------------------------------------------------------
+|                    FINALIZING TREE SEARCH                        |
+--------------------------------------------------------------------
+Performs final model parameters optimization
+Estimate model parameters (epsilon = 0.010)
+1. Initial log-likelihood: -28769.078
+2. Current log-likelihood: -28769.012
+3. Current log-likelihood: -28768.939
+4. Current log-likelihood: -28768.866
+5. Current log-likelihood: -28768.804
+6. Current log-likelihood: -28768.744
+7. Current log-likelihood: -28768.686
+8. Current log-likelihood: -28768.636
+9. Current log-likelihood: -28768.590
+10. Current log-likelihood: -28768.543
+11. Current log-likelihood: -28768.507
+12. Current log-likelihood: -28768.474
+13. Current log-likelihood: -28768.443
+14. Current log-likelihood: -28768.408
+15. Current log-likelihood: -28768.382
+16. Current log-likelihood: -28768.359
+17. Current log-likelihood: -28768.337
+18. Current log-likelihood: -28768.319
+19. Current log-likelihood: -28768.296
+20. Current log-likelihood: -28768.280
+21. Current log-likelihood: -28768.266
+22. Current log-likelihood: -28768.252
+23. Current log-likelihood: -28768.240
+24. Current log-likelihood: -28768.229
+25. Current log-likelihood: -28768.216
+Optimal log-likelihood: -28768.204
+Rate parameters:  A-C: 1.82775  A-G: 11.89643  A-T: 2.06920  C-G: 0.32471  C-T: 30.84586  G-T: 1.00000
+Base frequencies:  A: 0.290  C: 0.252  G: 0.257  T: 0.201
+Site proportion and rates:  (0.929,0.539) (0.071,7.038)
+Parameters optimization took 25 rounds (2.112 sec)
+BEST SCORE FOUND : -28768.204
+Total tree length: 0.160
+
+Total number of iterations: 102
+CPU time used for tree search: 160.164 sec (0h:2m:40s)
+Wall-clock time used for tree search: 41.519 sec (0h:0m:41s)
+Total CPU time used: 202.040 sec (0h:3m:22s)
+Total wall-clock time used: 52.048 sec (0h:0m:52s)
+
+Analysis results written to: 
+  IQ-TREE report:                Alignment_101025.fas.iqtree
+  Maximum-likelihood tree:       Alignment_101025.fas.treefile
+  Likelihood distances:          Alignment_101025.fas.mldist
+  Screen log file:               Alignment_101025.fas.log
+
+Date and Time: Fri Oct 10 14:58:53 2025

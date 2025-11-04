@@ -1,0 +1,1 @@
+"sa" = "sampling aware". Mandev: "it replaces the skygrid model with the sampling aware model of Karcher et al. I set it up so that the spacing of the effective population size change points and number of effective population size parameter values are the same as in the skygrid analysis."
