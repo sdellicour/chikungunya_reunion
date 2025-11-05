@@ -3,8 +3,8 @@
 	# - R(t) estimations: analysis with the episodic birth–death sampling (EBDS) model (based on a fixed tree or empirical trees)
 	# - R(t) estimations: analysis with a coalescent-based approach following Volz & Didelot (2018) or Borchering et al. (2021) ??
 # ANALYSES:
-	# - running --> Virtual Machine : SA, GLM, DTA (pending); MacStudio Pro : SKG, SA, EBDS on a fixed tree, RRW, DTA, GLM
-	# - to run --> EBDS on the fnial SA MCC tree, as well as EBDS on the final SA empirical trees
+	# - running --> Virtual Machine : SA, GLM, DTA (pending); MacStudio Pro : SKG, SA, EBDS on a fixed tree, DTA, GLM
+	# - to run --> EBDS on the fnial SA MCC tree as well as EBDS on the final SA empirical trees (when the related bug is fixed)
 # FIGURES:
 	# - Figure 1: sampling map with points coloured according to time + weekly epi-curve + SA + EBDS (+ R(t) coalescent-based?)
 	# - Figure 2: DTA reconstruction in 4 panels; Figure 3: results of the DTA-GLM analyses (boxplot of beta*inclusion probability?)
@@ -363,24 +363,49 @@ cases_day = interval(min(ymd(tab[,"collection_date"])),ymd(tab[,"collection_date
 daily_cases = rep(NA, total_number_of_days)
 for (i in 1:length(daily_cases)) daily_cases[i] = sum(cases_day==i)
 
-n_MC = 1000 # number of Monte-Carlo draws
-mean_range = c(10, 23); sd_range = c(4, 8) # days
-t_start = seq(2, length(daily_cases)-6); t_end = seq(8, length(daily_cases)) # sliding window
-all_R = matrix(NA, nrow=length(t_start), ncol=n_MC)
-for(i in 1:n_MC)
+n = 1000; mean_range = c(10, 23); sd_range = c(4, 8) # n = number of iterations, and ranges are in days
+t_start = seq(2, length(daily_cases)-6); t_end = seq(8, length(daily_cases)) # sliding window of 7 days
+all_R = matrix(NA, nrow=length(t_start), ncol=n)
+for (i in 1:n)
 	{
-		mean_si_i = runif(1, mean_range[1], mean_range[2])
-		sd_si_i = runif(1, sd_range[1], sd_range[2])
+		mean_si_i = runif(1, mean_range[1], mean_range[2]); sd_si_i = runif(1, sd_range[1], sd_range[2])
   		res_i = estimate_R(incid=daily_cases, method="parametric_si", config=make_config(list(
-      						mean_si=mean_si_i, std_si=sd_si_i, t_start=t_start, t_end=t_end)))
+						   mean_si=mean_si_i, std_si=sd_si_i, t_start=t_start, t_end=t_end)))
 		all_R[,i] = res_i$R$`Mean(R)`
 	}
-R_median = apply(all_R, 1, median); R_days = (t_start+t_end)/2
+R_median = apply(all_R, 1, median, na.rm=T); R_days = (t_start+t_end)/2
 R_dates = decimal_date(min(ymd(tab[,"collection_date"]))+R_days)
 R_lower = apply(all_R, 1, quantile, probs=0.025, na.rm=T)
 R_upper = apply(all_R, 1, quantile, probs=0.975, na.rm=T)
 
-	# 6.2. Visualisation of the evolution through time of the number of cases, R(t), and Ne
+	# 6.2. Estimation of R0 based on the exponential growth rate (Grassly & Fraser, 2008)
+
+n = 1000; mean_range = c(10, 23); sd_range = c(4, 8) # n = number of iterations, and ranges are in days
+log = read.table(paste0("BEAST_DTA_analysis/Without_DTA_model/Alignment_101025_exp.log"), head=T)
+rS1 = log[(((dim(log)[1]-1)/10)+2):dim(log)[1],"exponential.growthRate"]/365.25 # exponential growth rate (per day)
+R0s_list = list(); rS2 = sample(rS1, 1000, replace=F); lower_95ci = rep(NA, length(rS2)); upper_95ci = rep(NA, length(rS2))
+for (i in 1:length(rS2))
+	{
+		R0s = rep(NA, n); r = rS2[i]
+		for (j in 1:n)
+			{
+				mean_si_i = runif(1, mean_range[1], mean_range[2]); sd_si_i = runif(1, sd_range[1], sd_range[2])
+				a = (mean_si_i^2)/(sd_si_i^2); b = mean_si_i/(sd_si_i^2); R0s[j] = (1+(r/b))^a # https://beast.community/estimating_R0
+			}
+		R0s_list[[i]] = R0s; lower_95ci[i] = quantile(R0s, prob=0.025); upper_95ci[i] = quantile(R0s, prob=0.975)
+	}
+lower_95ci_median = median(lower_95ci); lower_95ci_95hpd = hdi(lower_95ci)[1:2]
+upper_95ci_median = median(upper_95ci); upper_95ci_95hpd = hdi(upper_95ci)[1:2]
+	# --> R0 estimates range from 1.44 (95% HPD = [1.41, 1.46]) to 2.28 (95% HPD = [2.18, 2.38])
+dev.new(width=8/2.8, height=8/3); par(oma=c(0,0,0,0), mar=c(2.8,3.0,1.0,1.0), lwd=0.3, bty="o", col="gray30", col.axis="gray30", fg="gray30")
+plot(density(R0s_list[[1]]), col=NA, xlim=c(0.5,3.5), ylim=c(0,1.65), axes=F, ann=F)
+for (i in 1:length(R0s_list)) lines(density(R0s_list[[i]]), lwd=0.1, col="gray70")
+axis(side=1, lwd=0.5, cex.axis=0.7, mgp=c(0,0.17,0), lwd.tick=0.5, col.lab="gray30", col="gray30", tck=-0.03, las=1)
+axis(side=2, lwd=0.5, cex.axis=0.7, mgp=c(0,0.4,-0.1), lwd.tick=0.5, col.lab="gray30", col="gray30", tck=-0.03, las=1, padj=0.4, at=seq(0,2,0.5))
+mtext("Density       ", side=2, col="gray30", cex=0.8, line=1.7, las=3)
+mtext("R0", side=1, col="gray30", cex=0.8, line=1.2)
+
+	# 6.3. Visualisation of the evolution through time of the number of cases, R(t), and Ne
 
 tab = read.table(paste0("BEAST_DTA_analysis/Alignment_",analysis,".txt"), head=T, sep="\t")
 tab_weeks = interval(min(ymd(tab[,"collection_date"])),ymd(tab[,"collection_date"]))%/%weeks(1)+1
@@ -388,8 +413,50 @@ skg = read.csv(paste0("BEAST_DTA_analysis/Without_DTA_model/Alignment_",analysis
 skg = skg[,c("time","median","lower","upper")]; colnames(skg) = c("time","median","95pHDP_lower","95pHDP_upper")
 skg[,"median"] = log(skg[,"median"]+1); timeSlice = skg[1,"time"]-skg[2,"time"]; skg_weeks = 51:1
 skg[,"95pHDP_lower"] = log(skg[,"95pHDP_lower"]+1); skg[,"95pHDP_upper"] = log(skg[,"95pHDP_upper"]+1)
+selected_months = c("202408","202409","202410","202411","202412","202501","202502","202503","202504","202505","202506","202507","202508")
+climatic_variables = matrix(nrow=length(selected_months), ncol=3); colnames(climatic_variables) = c("date","temperature","precipitation")
+climatic_data = read.csv("GLM_predictors_data/Original_data_files/Monthly_climate_data_2024-25.csv", head=T, sep=";")
+climatic_data = climatic_data[which(climatic_data[,"AAAAMM"]%in%selected_months),]; pol_coords = admin0@polygons[[1]]@Polygons[[1]]@coords
+climatic_data = climatic_data[which(point.in.polygon(climatic_data[,"LON"],climatic_data[,"LAT"],pol_coords[,"x"],pol_coords[,"y"])==1),]
+lon_lat = paste0(climatic_data[,"LON"],"_",climatic_data[,"LAT"]); indices = which((is.na(climatic_data[,"TMM"]))|(is.na(climatic_data[,"RR"])))
+lon_lat_to_discard = unique(lon_lat[indices]); climatic_data = climatic_data[which(!lon_lat%in%lon_lat_to_discard),]
+for (i in 1:length(selected_months))
+	{
+		if (selected_months[i] != "202412")
+			{
+				climatic_variables[i,"date"] = mean(decimal_date(ym(c(selected_months[i],as.character(as.numeric(selected_months[i])+1)))))
+			}	else	{
+				climatic_variables[i,"date"] = mean(decimal_date(ym(c(selected_months[i],"202501"))))
+			}
+		climatic_variables[i,"temperature"] = mean(climatic_data[which(climatic_data[,"AAAAMM"]==selected_months[i]),"TMM"]) # °C
+		climatic_variables[i,"precipitation"] = mean(climatic_data[which(climatic_data[,"AAAAMM"]==selected_months[i]),"RR"]) # mm
+	}
 
-pdf(paste0("Figure_1B_",analysis,"_NEW.pdf"), width=8/2, height=8/2) # dev.new(width=8/2, height=8/2)
+pdf(paste0("Figure_1B_",analysis,"_NEW1.pdf"), width=8/2, height=8/2) # dev.new(width=8/2, height=8/2)
+par(mfrow=c(3,1), oma=c(0,0,0,0), mar=c(2.0,3.5,0.1,0.5), lwd=0.3, bty="o", col="gray30", col.axis="gray30", fg="gray30")
+hist(decimal_date(ymd(tab[,"collection_date"])), breaks=51, col="gray70", border=NA, axes=F, ann=F, ylim=c(0,380), xlim=c(2024.62,2025.59))
+hist(decimal_date(ymd(tab[,"collection_date"])), breaks=51, col=paste0(collection_week_cols,"BF"), add=T)
+dates = c("2024-08-07","2024-09-01","2024-10-01","2024-11-01","2024-12-01","2025-01-01","2025-02-01","2025-03-01","2025-04-01","2025-05-01","2025-06-01","2025-07-01","2025-08-08")
+ats1 = decimal_date(ymd(dates)); ats2 = ats1[2:(length(ats1)-1)]; labels1 = gsub("-","\\/",dates[2:(length(dates)-1)])
+axis(side=1, lwd=0.5, cex.axis=0.7, mgp=c(0,0.17,0), lwd.tick=0, col.lab="gray30", col="gray30", tck=-0.04, las=1, at=ats1, label=rep("",length(ats1)))
+axis(side=1, lwd=0, cex.axis=0.7, mgp=c(0,0.17,0), lwd.tick=0.5, col.lab="gray30", col="gray30", tck=-0.04, las=1, at=ats2, label=labels1)
+axis(side=2, lwd=0.5, cex.axis=0.7, mgp=c(0,0.4,-0.1), lwd.tick=0.5, col.lab="gray30", col="gray30", tck=-0.04, las=1, padj=0.4, at=seq(0,300,100))
+mtext("Genomic samples", side=2, col="gray30", cex=0.6, line=1.7, las=3)
+vS = climatic_variables[,"temperature"]; dates = climatic_variables[,"date"]
+plot(dates, vS, type="l", lwd=0.8, col=collection_week_cols[1], ylim=c(min(vS),max(vS)+(0.2*(max(vS)-min(vS)))), xlim=c(2024.62,2025.59), ann=F, axes=F)
+points(climatic_variables[,"date"], climatic_variables[,"temperature"], pch=16, cex=0.8, col=collection_week_cols[1]) # red
+axis(side=1, lwd=0.5, cex.axis=0.7, mgp=c(0,0.17,0), lwd.tick=0, col.lab="gray30", col="gray30", tck=-0.04, las=1, at=ats1, label=rep("",length(ats1)))
+axis(side=1, lwd=0, cex.axis=0.7, mgp=c(0,0.17,0), lwd.tick=0.5, col.lab="gray30", col="gray30", tck=-0.04, las=1, at=ats2, label=labels1)
+axis(side=2, lwd=0.5, cex.axis=0.7, mgp=c(0,0.4,-0.1), lwd.tick=0.5, col.lab="gray30", col="gray30", tck=-0.04, las=1, padj=0.4)
+mtext("Temperature (°C)", side=2, col="gray30", cex=0.6, line=1.7, las=3)
+par(new=T)
+vS = climatic_variables[,"precipitation"]; dates = climatic_variables[,"date"]
+plot(dates, vS, type="l", lwd=0.8, col=collection_week_cols[length(collection_week_cols)], ylim=c(min(vS),max(vS)+(0.2*(max(vS)-min(vS)))), xlim=c(2024.62,2025.59), ann=F, axes=F)
+points(climatic_variables[,"date"], climatic_variables[,"precipitation"], pch=16, cex=0.8, col=collection_week_cols[length(collection_week_cols)]) # blue
+axis(side=4, lwd=0.5, cex.axis=0.7, mgp=c(0,0.4,-0.1), lwd.tick=0.5, col.lab="gray30", col="gray30", tck=-0.04, las=1, padj=0.4)
+dev.off()
+
+pdf(paste0("Figure_1B_",analysis,"_NEW2.pdf"), width=8/2, height=8/2) # dev.new(width=8/2, height=8/2)
 par(mfrow=c(3,1), oma=c(0,0,0,0), mar=c(2.0,3.5,0.1,0.5), lwd=0.3, bty="o", col="gray30", col.axis="gray30", fg="gray30")
 hist(decimal_date(ymd(tab[,"collection_date"])), breaks=51, col="gray70", border=NA, axes=F, ann=F, ylim=c(0,380), xlim=c(2024.62,2025.59))
 hist(decimal_date(ymd(tab[,"collection_date"])), breaks=51, col=paste0(collection_week_cols,"BF"), add=T)
@@ -434,6 +501,36 @@ axis(side=1, lwd=0.5, cex.axis=0.7, mgp=c(0,0.17,0), lwd.tick=0, col.lab="gray30
 axis(side=1, lwd=0, cex.axis=0.7, mgp=c(0,0.17,0), lwd.tick=0.5, col.lab="gray30", col="gray30", tck=-0.04, las=1, at=ats2, label=labels1)
 axis(side=2, lwd=0.5, cex.axis=0.7, mgp=c(0,0.4,-0.1), lwd.tick=0.5, col.lab="gray30", col="gray30", tck=-0.04, las=1, padj=0.4)
 mtext("Effective reproduction number", side=2, col="gray30", cex=0.55, line=1.7, las=3)
+dev.off()
+
+	# 6.3. Visualisation of the time-scaled phylogenetic inference (based on the MCC tree)
+
+trees1 = scan(paste0("BEAST_DTA_analysis/Without_DTA_model/Alignment_",analysis,"_exp.trees"), what="", sep="\n", quiet=T) # to be replaced with the "SA" analysis
+indices1 = which(!grepl("tree STATE",trees1)); indices1 = indices1[1:(length(indices1)-1)]; indices2 = which(grepl("tree STATE",trees1))
+burnIn = ((length(indices2)-1)/10)+1; indices3 = indices2[(burnIn+1):length(indices2)]; interval = floor(length(indices3)/1000)
+indices4 = indices3[seq(interval, 1000*interval, interval)]; trees2 = c(trees1[c(indices1,indices4)], "End;")
+write(trees2, paste0("BEAST_DTA_analysis/Without_DTA_model/Alignment_",analysis,"_1000.trees"))
+
+tree = readAnnotatedNexus(paste0("BEAST_DTA_analysis/Without_DTA_model/Alignment_",analysis,"_1000.tree"))
+tab = read.table(paste0("Alignment_",analysis,".txt"), head=T)
+rootHeight = max(nodeHeights(tree)); root_time = mostRecentSamplingDatum-rootHeight
+node_dates = mostRecentSamplingDatum-nodeHeights(tree)[,2]
+node_weeks = interval(min(ymd(tab[,"collection_date"])),date_decimal(node_dates))%/%weeks(1)+1
+node_weeks[node_weeks<1] = 1; nodes_cols = paste0(collection_week_cols[node_weeks],"BF")
+
+pdf(paste0("Figure_S1_",analysis,"_NEW.pdf"), width=8, height=8) # dev.new(width=8, height=8)
+par(oma=c(0,0,0,0), mar=c(0.0,0.0,0.0,0), lwd=0.3, bty="o", col="gray30", col.axis="gray30", fg="gray30", lheight=0.85)
+plot(tree, type="fan", show.tip.label=F, show.node.label=F, edge.width=0.2, cex=0.6, align.tip.label=3, col="gray30", edge.color="gray30")
+for (i in 1:dim(tree$edge)[1])
+	{
+		if (!tree$edge[i,2]%in%tree$edge[,1])
+			{
+				nodelabels(node=tree$edge[i,2], pch=16, cex=0.6, col="white")
+				nodelabels(node=tree$edge[i,2], pch=16, cex=0.6, col=nodes_cols[i])
+				nodelabels(node=tree$edge[i,2], pch=1, cex=0.6, col="gray30", lwd=0.3)
+			}
+	}
+add.scale.bar(x=0.37, y=-0.9, length=NULL, ask=F, lwd=0.5 , lcol="gray30", cex=0.7)
 dev.off()
 
 # 7. Discrete phylogeographic analysis based on the municipalities
@@ -669,6 +766,7 @@ for (h in 1:2)
 	}
 dev.off()
 
-system(paste0("magick -units PixelsPerInch -density 1000 Figure_2_",analysis,".pdf -background white -alpha remove -flatten Alignment_",analysis,".png"))
-system(paste0("magick -units PixelsPerInch -density 1000 Figure_S1_",analysis,".pdf -background white -alpha remove -flatten Sampling_4_maps.png"))
+system(paste0("magick -units PixelsPerInch -density 1000 Figure_1_",analysis,".pdf -background white -alpha remove -flatten Figure_1_",analysis,".png"))
+system(paste0("magick -units PixelsPerInch -density 1000 Figure_2_",analysis,".pdf -background white -alpha remove -flatten Figure_2_",analysis,".png"))
+system(paste0("magick -units PixelsPerInch -density 1000 Figure_S1_",analysis,".pdf -background white -alpha remove -flatten Figure_S1_",analysis,".png"))
 
