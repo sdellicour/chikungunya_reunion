@@ -1,0 +1,5 @@
+,inclusion_probability,BF,coefficient_if_included
+population_count_origin,1,>999,0.514 [0.331, 0.63]
+population_count_destination,1,>999,0.98 [0.813, 1.096]
+geographic_distances,1,>999,-0.476 [-0.562, -0.32]
+pairwise_mobility_metric,0.5,11,0.029 [0, 0.478]

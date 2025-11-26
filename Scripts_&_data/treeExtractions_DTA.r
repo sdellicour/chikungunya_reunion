@@ -71,5 +71,11 @@ treeExtractions_DTA = function(dta_tre, mostRecentSamplingDatum)
 		dta_tab1 = dta_tab[1,]; dta_tab2 = dta_tab[2:dim(dta_tab)[1],]
 		dta_tab2 = dta_tab2[order(dta_tab2[,"endYear"],decreasing=F),]
 		dta_tab = rbind(dta_tab1, dta_tab2); dta_tab = dta_tab[,c(1,2,4,5,3,6:9)]
+		tipLabels = matrix(nrow=dim(dta_tab)[1], ncol=1); colnames(tipLabels) = "tipLabel"
+		for (i in 1:length(dta_tre$tip.label))
+			{
+				tipLabels[which(dta_tab[,"node2"]==i),"tipLabel"] = gsub("'","",dta_tre$tip.label[i])
+			}
+		dta_tab = cbind(dta_tab, tipLabels)
 		return(dta_tab)
 	}
