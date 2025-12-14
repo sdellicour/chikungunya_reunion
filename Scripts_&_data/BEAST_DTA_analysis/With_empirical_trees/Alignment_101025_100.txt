@@ -1,0 +1,43 @@
+Counting trees...
+Total number of trees: 100
+
+Reading trees...
+0              25             50             75            100
+|--------------|--------------|--------------|--------------|
+**************************************************************************************************** [0 secs]
+
+Total trees read: 100
+Size of trees: 3114 tips
+Total unique clades: 206598
+Total clades in more than one tree: 20314
+
+Finding maximum credibility tree...
+Analyzing 100 trees...
+0              25             50             75            100
+|--------------|--------------|--------------|--------------|
+**************************************************************************************************** [1 secs]
+
+Best tree: STATE_107000000 (tree number 35)
+Best tree's log clade credibility: -10891.6798
+Lowest individual clade credibility: 0.0100
+Mean individual clade credibility: 0.1573
+Median individual clade credibility: 0.0100
+Number of clades with credibility 1.0: 0
+Number of clades with credibility > 0.99: 192
+Number of clades with credibility > 0.95: 273 / 276 (in all trees)
+Number of clades with credibility > 0.5: 422 / 457 (in all trees)
+
+Collecting node information...
+0              25             50             75            100
+|--------------|--------------|--------------|--------------|
+**************************************************************************************************** [2 secs]
+
+Annotating target tree...
+
+Writing annotated tree...
+
+Written to file: /Users/simondellicour/Dropbox/Temp_MBP4/CHIKV/BEAST_DTA_analysis/With_empirical_trees/Alignment_101025_100.tree
+
+Total time: 5 secs
+
+Finished - Quit program to exit.
