@@ -1,3 +1,4 @@
+library(adephylo)
 library(colorspace)
 library(diagram)
 library(EpiEstim)
@@ -12,12 +13,12 @@ showingPlots = FALSE
 
 # 1. Investigating the temporal signal associated with the alignment
 # 2. Preliminary BEAST analysis to estimate the substitution rate
-# 3. Some attempts to conduct a continuous phylogeographic analysis
-# 4. Preparing the skygrid and discrete phylogeographic analyses
-# 5. Preparing the different predictors for the discrete-GLM analysis
-# 6. Evolution of Ne and R(t): skygrid and sampling aware analyses
-# 7. Discrete phylogeographic analysis based on the municipalities
-# 8. Analysing and reporting the results of the discrete-GLM analysis
+# 3. Preparing the skygrid and discrete phylogeographic analyses
+# 4. Preparing the different predictors for the discrete-GLM analysis
+# 5. Evolution of Ne and R(t): skygrid and sampling aware analyses
+# 6. Discrete phylogeographic analysis based on the municipalities
+# 7. Analysing and reporting the results of the discrete-GLM analysis
+# 8. Conducting complementary isolation-by-distance (IBD) analyses
 
 tab = read.table(paste0("BEAST_CTA_analysis/Alignment_",analysis,".txt"), head=T)
 mostRecentSamplingDatum = max(decimal_date(ymd(tab[,"collection_date"]))) # 2025.595
@@ -163,102 +164,7 @@ axis(side=1, lwd=0.5, cex.axis=0.60, mgp=c(0,0,0), lwd.tick=0.5, col.lab="gray30
 axis(side=2, lwd=0.5, cex.axis=0.60, mgp=c(0,0.1,-0.3), lwd.tick=0.5, col.lab="gray30", col="gray30", tck=-0.03, las=1, padj=0.22)
 dev.off()
 
-# 3. Some attempts to conduct a continuous phylogeographic analysis
-
-	# 3.1. Subsampling by phylogenetic clustering and then keeping only one sample per set of coordinates
-
-tab = read.csv(paste0("Alignment_",analysis,".csv"), head=T, sep=";")
-tre = read.tree(paste0("Alignment_",analysis,".tre")); tree = tre; subTrees = subtrees(tree, wait=F)
-c1 = 0; clusters1 = list() # all clusters (including the "nested" ones)
-c2 = 0; clusters2 = list() # all clusters minus the "nested" clades
-for (i in 2:length(subTrees)) # the 1st subtree is the entire tree
-	{
-		subTree = subTrees[i][[1]]; labels = subTree$tip.label
-		locations = rep(NA, length(labels))
-		for (j in 1:length(labels))
-			{
-				coordinates = tab[which(tab[,1]==labels[j]),2:3]
-				locations[j] = paste0(coordinates[1],"_",coordinates[2])
-			}
-		if (length(unique(locations)) == 1)
-			{
-				c1 = c1+1; clusters1[[c1]] = labels
-			}
-	}
-for (i in 1:length(clusters1))
-	{
-		nested = FALSE
-		for (j in 1:length(clusters1))
-			{
-				if (i != j)
-					{
-						allSequencesIncluded = TRUE
-						for (k in 1:length(clusters1[[i]]))
-							{
-								if (!clusters1[[i]][k]%in%clusters1[[j]]) allSequencesIncluded = FALSE
-							}
-						if (allSequencesIncluded == TRUE) nested = TRUE
-					}
-			}
-		if (nested == FALSE)
-			{
-				c2 = c2+1; clusters2[[c2]] = clusters1[[i]]
-			}	
-	}
-sequencesToRemove1 = c(); sequencesToRemove2 = c()
-for (i in 1:length(clusters2))
-	{
-		sequencesToRemove1 = c(sequencesToRemove1, sample(clusters2[[i]],length(clusters2[[i]])-1,replace=F))
-	}
-fasta1 = scan(paste0("Alignment_",analysis,".fas"), what="", sep="\n", quiet=T); fasta2 = c(); fasta3 = c()
-for (i in 1:length(fasta1))
-	{
-		if ((grepl(">",fasta1[i]))&&(!gsub(">","",fasta1[i])%in%sequencesToRemove1)) fasta2 = c(fasta2, fasta1[c(i,i+1)])
-	}
-tab = read.csv(paste0("Alignment_",analysis,".csv"), head=T, sep=";")
-tab1 = read.table(paste0("Alignment_",analysis,".txt"), head=T)
-tab1 = tab1[which(!tab1[,1]%in%sequencesToRemove1),]
-tab2 = tab[which(!tab[,1]%in%sequencesToRemove1),]
-tab = cbind(tab1, matrix(nrow=dim(tab1)[1],ncol=2))
-for (i in 1:dim(tab)[1])
-	{
-		tab[i,3:4] = tab2[which(tab2[,1]==tab[i,1]),3:2]
-	}
-colnames(tab) = c("trait","collection_date","latitude","longitude")
-coordinates = rep(NA, dim(tab)[1])
-for (i in 1:dim(tab)[1])
-	{
-		coordinates[i] = paste0(tab[i,3],"_",tab[i,4])
-	}
-unique_coordinates = unique(coordinates) # 3946/3105
-for (i in 1:length(unique_coordinates))
-	{
-		indices = which(coordinates==unique_coordinates[i])
-		if (length(indices) > 1)
-			{
-				sequencesToRemove2 = c(sequencesToRemove2, sample(tab[indices,1],length(indices)-1,replace=F))
-			}
-	}
-tab = tab[which(!tab[,1]%in%sequencesToRemove2),]
-for (i in 1:length(fasta2))
-	{
-		if ((grepl(">",fasta2[i]))&&(!gsub(">","",fasta2[i])%in%sequencesToRemove2)) fasta3 = c(fasta3, fasta2[c(i,i+1)])
-	}
-write.table(tab, paste0("BEAST_CTA_analysis/Alignment_",analysis,".txt"), row.names=F, quote=F, sep="\t")
-write(fasta3, paste0("BEAST_CTA_analysis/Alignment_",analysis,".fas"))
-
-	# 3.2. Extracting the spatio-temporal information embedded in posterior trees
-
-tab = read.table(paste0("BEAST_CTA_analysis/Alignment_",analysis,".txt"), head=T)
-mostRecentSamplingDatum = max(decimal_date(ymd(tab[,"collection_date"])))
-trees = readAnnotatedNexus(paste0("BEAST_CTA_analysis/With_empirical_trees/Alignment_",analysis,"_emp.trees"))
-for (i in 1:length(trees))
-	{
-		tab = postTreeExtractions(trees[[i]], mostRecentSamplingDatum)
-		write.csv(tab, paste0("BEAST_CTA_analysis/With_empirical_trees/Alignment_",analysis,"_emp_ext/TreeExtractions_",i,".csv"), row.names=F, quote=F)
-	}
-
-# 4. Preparing the skygrid and discrete phylogeographic analyses
+# 3. Preparing the skygrid and discrete phylogeographic analyses
 
 fas = scan(paste0("Alignment_",analysis,".fas"), what="", sep="\n", quiet=T)
 tab1 = read.table(paste0("Alignment_",analysis,".txt"), head=T)
@@ -280,9 +186,9 @@ for (i in 1:dim(tab)[1])
 write.table(tab, paste0("BEAST_DTA_analysis/Alignment_",analysis,".txt"), row.names=F, quote=F, sep="\t")
 write(fas, paste0("BEAST_DTA_analysis/Alignment_",analysis,".fas"))
 
-# 5. Preparing the different predictors for the discrete-GLM analysis
+# 4. Preparing the different predictors for the discrete-GLM analysis
 
-	# 5.1. Population count at the municipality of origin and at the destination municipality
+	# 4.1. Population count at the municipality of origin and at the destination municipality
 
 population_counts = matrix(nrow=dim(admins2)[1], ncol=1); correspondences = matrix(nrow=dim(admins2@data)[1], ncol=2)
 colnames(population_counts) = c("population_count"); row.names(population_counts) = admins2@data[,"GID_2"]
@@ -297,7 +203,7 @@ for (i in 1:dim(population_counts)[1])
 	}
 write.csv(population_counts, "GLM_predictors_data/Prepared_predictors/Population_counts.csv", quote=F)
 
-	# 5.2. Pairwise great-circle geographic distance between population-weighted centroid points
+	# 4.2. Pairwise great-circle geographic distance between population-weighted centroid points
 
 centroids = matrix(nrow=dim(admins2@data)[1], ncol=2); row.names(centroids) = admins2@data[,"GID_2"]
 population = raster("GLM_predictors_data/Original_data_files/Population_2025_100m_R2025A.tif")
@@ -330,7 +236,7 @@ for (i in 1:dim(centroids)[1])
 	}
 write.csv(geographic_distances, "GLM_predictors_data/Prepared_predictors/Geographic_distances.csv", quote=F)
 
-	# 5.3. Pairwise measure of the mobility (commuting) flux between municipalities (symetric)
+	# 4.3. Pairwise measure of the mobility (commuting) flux between municipalities (symetric)
 
 mobility_metric = matrix(nrow=dim(admins2@data)[1], ncol=dim(admins2@data)[1])
 row.names(mobility_metric) = admins2@data[,"GID_2"]; colnames(mobility_metric) = admins2@data[,"GID_2"]
@@ -354,7 +260,7 @@ for (i in 1:dim(admins2@data)[1])
 	}
 write.csv(mobility_metric, "GLM_predictors_data/Prepared_predictors/Pairwise_mobility_metric.csv", quote=F)
 
-# 6. Evolution of Ne and R(t): skygrid and sampling aware analyses
+# 5. Evolution of Ne and R(t): skygrid and sampling aware analyses
 
 		# For the generation (or serial) time distribution, the mean was drawn from a uniform distribution ranging from 8 to 23 days and the standard
 		# deviation from a uniform distribution ranging from 4 to 8 days, reflecting a range of values reported and considered in the literature:
@@ -363,45 +269,34 @@ write.csv(mobility_metric, "GLM_predictors_data/Prepared_predictors/Pairwise_mob
 		#     - Meyer et al. (2023, Epidemics): 13.8 for Italy, 12.2 for Cambodia, and 10.3 days for Bangladesh
 		#     - Meyer et al. (2025, Sci. Adv.): median of 10 days, as well as 9 and 12 days for the warmest and collest populations, respectively
 
-	# 6.1. Estimation of the evolution of R(t) following the method of Cori et al. (2013)
-	
-data = read.csv("Cases_symptoms.csv", head=T) # source: SPF
-dates = dmy(data[,"start"])+3.5 # to get the middle of the week
-total_number_of_weeks = dim(data)[1]; weekly_cases = data[,"cases"]
-n = 1000; mean_range = c(9, 23); sd_range = c(4, 8) # n = number of iterations, and ranges are in days
-t_start = 2:dim(data)[1]; t_end = 2:dim(data)[1] # 1 week (no sliding window)
-all_R = matrix(NA, nrow=length(t_start), ncol=n)
-for (i in 1:n)
-	{
-		mean_si_i = runif(1, mean_range[1], mean_range[2]); sd_si_i = runif(1, sd_range[1], sd_range[2])
-  		res_i = estimate_R(incid=weekly_cases, method="parametric_si", config=make_config(list(
-						   mean_si=mean_si_i, std_si=sd_si_i, t_start=t_start, t_end=t_end)))
-		all_R[,i] = res_i$R$`Mean(R)`
-	}
-R_median = apply(all_R, 1, median, na.rm=T); R_days = (t_start+t_end)/2
-R_dates = decimal_date(min(ymd(tab[,"collection_date"]))+R_days)
-R_lower = apply(all_R, 1, quantile, probs=0.025, na.rm=T)
-R_upper = apply(all_R, 1, quantile, probs=0.975, na.rm=T)
-
-	# 6.2. Estimation of R0 based on the exponential growth rate (Grassly & Fraser, 2008)
+	# 5.1. Estimation of R0 based on the exponential growth rate (Grassly & Fraser, 2008)
 
 n = 1000; mean_range = c(9, 23); sd_range = c(4, 8) # n = number of iterations, and ranges are in days
 log = read.table(paste0("BEAST_DTA_analysis/Without_DTA_model/Alignment_101025_exp.log"), head=T)
 rS1 = log[(((dim(log)[1]-1)/10)+2):dim(log)[1],"exponential.growthRate"]/365.25 # exponential growth rate (per day)
-R0s_list = list(); rS2 = sample(rS1, 1000, replace=F); lower_95ci = rep(NA, length(rS2)); upper_95ci = rep(NA, length(rS2))
+rS2 = sample(rS1, 1000, replace=F); R0s_list = list(); Rfs_list = list()
+R0_lower_95ci = rep(NA, length(rS2)); R0_upper_95ci = rep(NA, length(rS2))
+Rf_lower_95ci = rep(NA, length(rS2)); Rf_upper_95ci = rep(NA, length(rS2))
+pC = 0; pI = 0.66 # as of early November 2025 (see SPF report of 03/11/25)
 for (i in 1:length(rS2))
 	{
-		R0s = rep(NA, n); r = rS2[i]
+		R0s = rep(NA, n); Rfs = rep(NA, n); r = rS2[i]
 		for (j in 1:n)
 			{
 				mean_si_i = runif(1, mean_range[1], mean_range[2]); sd_si_i = runif(1, sd_range[1], sd_range[2])
 				a = (mean_si_i^2)/(sd_si_i^2); b = mean_si_i/(sd_si_i^2); R0s[j] = (1+(r/b))^a # https://beast.community/estimating_R0
+				Rfs[j] = R0s[j]*(1-pC)*(1-pI) # as summarised in Fontanet & Cauchemez (2020; with pC set to 0)
 			}
-		R0s_list[[i]] = R0s; lower_95ci[i] = quantile(R0s, prob=0.025); upper_95ci[i] = quantile(R0s, prob=0.975)
+		R0s_list[[i]] = R0s; R0_lower_95ci[i] = quantile(R0s, prob=0.025); R0_upper_95ci[i] = quantile(R0s, prob=0.975)
+		Rfs_list[[i]] = Rfs; Rf_lower_95ci[i] = quantile(Rfs, prob=0.025); Rf_upper_95ci[i] = quantile(Rfs, prob=0.975)
 	}
-lower_95ci_median = median(lower_95ci); lower_95ci_95hpd = hdi(lower_95ci)[1:2]
-upper_95ci_median = median(upper_95ci); upper_95ci_95hpd = hdi(upper_95ci)[1:2]
+R0_lower_95ci_median = median(R0_lower_95ci); R0_lower_95ci_95hpd = hdi(R0_lower_95ci)[1:2]
+R0_upper_95ci_median = median(R0_upper_95ci); R0_upper_95ci_95hpd = hdi(R0_upper_95ci)[1:2]
 	# --> R0 estimates range from 1.39 (95% HPD = [1.36, 1.41]) to 2.27 (95% HPD = [2.18, 2.38])
+Rf_lower_95ci_median = median(Rf_lower_95ci); Rf_lower_95ci_95hpd = hdi(Rf_lower_95ci)[1:2]
+Rf_upper_95ci_median = median(Rf_upper_95ci); Rf_upper_95ci_95hpd = hdi(Rf_upper_95ci)[1:2]
+	# --> Rf estimates range from 0.47 (95% HPD = [0.46, 0.48]) to 0.77 (95% HPD = [0.74, 0.81])
+
 dev.new(width=8/2.8, height=8/3); par(oma=c(0,0,0,0), mar=c(2.8,3.0,1.0,1.0), lwd=0.3, bty="o", col="gray30", col.axis="gray30", fg="gray30")
 plot(density(R0s_list[[1]]), col=NA, xlim=c(0.5,3.5), ylim=c(0,1.65), axes=F, ann=F)
 for (i in 1:length(R0s_list)) lines(density(R0s_list[[i]]), lwd=0.1, col="gray70")
@@ -410,7 +305,7 @@ axis(side=2, lwd=0.5, cex.axis=0.7, mgp=c(0,0.4,-0.1), lwd.tick=0.5, col.lab="gr
 mtext("Density       ", side=2, col="gray30", cex=0.8, line=1.7, las=3)
 mtext("R0", side=1, col="gray30", cex=0.8, line=1.2)
 
-	# 6.3. Setting the parameters for an episodic birth-death-sampling (EBDS) analysis
+	# 5.2. Setting the parameters for an episodic birth-death-sampling (EBDS) analysis
 
 		# Estimation of the transmission period used to anchor the death rate: 8-15 days = 5-8 days of human infectiousness (Cauchemez et al. 2014;
 		# Eurosurveillance, SI data) + 3–7 days to take into account the mosquito extrinsic incubation period (EIP; Zhao et al. 2025, Biosaf. Health).
@@ -469,7 +364,7 @@ quantile(Re, probs=c(0.025,0.5,0.975))
 quantile(del, probs=c(0.025,0.5,0.975))
 quantile(rho, probs=c(0.025,0.5,0.975))
 
-	# 6.4. Visualisation of the evolution through time of the number of cases, Ne, and R(t)
+	# 5.3. Visualisation of the evolution through time of the number of cases, Ne, and R(t)
 
 tab = read.table(paste0("BEAST_DTA_analysis/Alignment_",analysis,".txt"), head=T, sep="\t")
 tab_weeks = interval(min(ymd(tab[,"collection_date"])),ymd(tab[,"collection_date"]))%/%weeks(1)+1
@@ -602,45 +497,15 @@ axis(side=2, lwd=0.5, cex.axis=0.7, mgp=c(0,0.4,-0.1), lwd.tick=0.5, col.lab="gr
 mtext(expression("Reproduction number R"[t]), side=2, col="gray30", cex=0.55, line=1.7, las=3)
 dev.off()
 
-	# 6.3. Visualisation of the time-scaled phylogenetic inference (based on the MCC tree)
+# 6. Discrete phylogeographic analysis based on the municipalities
 
-trees1 = scan(paste0("BEAST_DTA_analysis/Without_DTA_model/Alignment_",analysis,"_exp.trees"), what="", sep="\n", quiet=T) # to be replaced with the "SA" analysis
-indices1 = which(!grepl("tree STATE",trees1)); indices1 = indices1[1:(length(indices1)-1)]; indices2 = which(grepl("tree STATE",trees1))
-burnIn = ((length(indices2)-1)/10)+1; indices3 = indices2[(burnIn+1):length(indices2)]; interval = floor(length(indices3)/nberOfExtractionFiles)
-indices4 = indices3[seq(interval, nberOfExtractionFiles*interval, interval)]; trees2 = c(trees1[c(indices1,indices4)], "End;")
-write(trees2, paste0("BEAST_DTA_analysis/Without_DTA_model/Alignment_",analysis,"_",nberOfExtractionFiles,".trees"))
+	# 6.1. Extracting the spatio-temporal information embedded in posterior trees
 
-tree = readAnnotatedNexus(paste0("BEAST_DTA_analysis/Without_DTA_model/Alignment_",analysis,"_",nberOfExtractionFiles,".tree"))
-tab = read.table(paste0("Alignment_",analysis,".txt"), head=T)
-rootHeight = max(nodeHeights(tree)); root_time = mostRecentSamplingDatum-rootHeight
-node_dates = mostRecentSamplingDatum-nodeHeights(tree)[,2]
-node_weeks = interval(min(ymd(tab[,"collection_date"])),date_decimal(node_dates))%/%weeks(1)+1
-node_weeks[node_weeks<1] = 1; nodes_cols = paste0(collection_week_cols1[node_weeks],"BF")
-
-pdf(paste0("Figure_S4_",analysis,"_NEW.pdf"), width=8, height=8) # dev.new(width=8, height=8)
-par(oma=c(0,0,0,0), mar=c(0.0,0.0,0.0,0), lwd=0.3, bty="o", col="gray30", col.axis="gray30", fg="gray30", lheight=0.85)
-plot(tree, type="fan", show.tip.label=F, show.node.label=F, edge.width=0.2, cex=0.6, align.tip.label=3, col="gray30", edge.color="gray30")
-for (i in 1:dim(tree$edge)[1])
-	{
-		if (!tree$edge[i,2]%in%tree$edge[,1])
-			{
-				nodelabels(node=tree$edge[i,2], pch=16, cex=0.6, col="white")
-				nodelabels(node=tree$edge[i,2], pch=16, cex=0.6, col=nodes_cols[i])
-				nodelabels(node=tree$edge[i,2], pch=1, cex=0.6, col="gray30", lwd=0.3)
-			}
-	}
-add.scale.bar(x=0.37, y=-0.9, length=NULL, ask=F, lwd=0.5 , lcol="gray30", cex=0.7)
-dev.off()
-
-# 7. Discrete phylogeographic analysis based on the municipalities
-
-	# 7.1. Extracting the spatio-temporal information embedded in posterior trees
-
-nberOfTreesToSample = 100; nberOfExtractionFiles = nberOfTreesToSample; burnIn = 151 # to do: update the burn-in for the final analysis
+nberOfTreesToSample = 100; nberOfExtractionFiles = nberOfTreesToSample; burnIn = 251
 log = scan(paste0("BEAST_DTA_analysis/With_empirical_trees/Alignment_",analysis,"_emp1.log"), what="", sep="\n", quiet=T, blank.lines.skip=F)
-index1 = 6+burnIn; index2 = length(log); interval = round((index2-index1)/nberOfTreesToSample)
+index1 = 5+burnIn; index2 = length(log); interval = round((index2-index1)/nberOfTreesToSample)
 indices = seq(index2-((nberOfTreesToSample-1)*interval),index2,interval)
-write(log[c(5,indices)], paste0("BEAST_DTA_analysis/With_empirical_trees/Alignment_",analysis,"_",nberOfExtractionFiles,".log"))
+write(log[c(4,indices)], paste0("BEAST_DTA_analysis/With_empirical_trees/Alignment_",analysis,"_",nberOfExtractionFiles,".log"))
 trees = scan(paste0("BEAST_DTA_analysis/With_empirical_trees/Alignment_",analysis,"_emp1.trees"), what="", sep="\n", quiet=T, blank.lines.skip=F)
 index1 = which(trees=="\t\t;")[length(which(trees=="\t\t;"))]; index2 = index1 + burnIn + 1
 indices3 = which(grepl("tree STATE",trees)); index3 = indices3[length(indices3)]
@@ -696,7 +561,31 @@ for (i in 1:nberOfExtractionFiles)
 			}
 	}
 
-	# 7.2. Visualising the dispersal history of viral lineages among municipalities
+	# 6.2. Visualisation of the time-scaled phylogenetic inference (based on the MCC tree)
+
+tree = readAnnotatedNexus(paste0("BEAST_DTA_analysis/With_empirical_trees/Alignment_",analysis,"_",nberOfExtractionFiles,".tree"))
+tab = read.table(paste0("Alignment_",analysis,".txt"), head=T)
+rootHeight = max(nodeHeights(tree)); root_time = mostRecentSamplingDatum-rootHeight
+node_dates = mostRecentSamplingDatum-nodeHeights(tree)[,2]
+node_weeks = interval(min(ymd(tab[,"collection_date"])),date_decimal(node_dates))%/%weeks(1)+1
+node_weeks[node_weeks<1] = 1; nodes_cols = paste0(collection_week_cols1[node_weeks],"BF")
+
+pdf(paste0("Figure_S4_",analysis,"_NEW.pdf"), width=8, height=8) # dev.new(width=8, height=8)
+par(oma=c(0,0,0,0), mar=c(0.0,0.0,0.0,0), lwd=0.3, bty="o", col="gray30", col.axis="gray30", fg="gray30", lheight=0.85)
+plot(tree, type="fan", show.tip.label=F, show.node.label=F, edge.width=0.2, cex=0.6, align.tip.label=3, col="gray30", edge.color="gray30")
+for (i in 1:dim(tree$edge)[1])
+	{
+		if (!tree$edge[i,2]%in%tree$edge[,1])
+			{
+				nodelabels(node=tree$edge[i,2], pch=16, cex=0.6, col="white")
+				nodelabels(node=tree$edge[i,2], pch=16, cex=0.6, col=nodes_cols[i])
+				nodelabels(node=tree$edge[i,2], pch=1, cex=0.6, col="gray30", lwd=0.3)
+			}
+	}
+add.scale.bar(x=0.37, y=-0.9, length=NULL, ask=F, lwd=0.5 , lcol="gray30", cex=0.7)
+dev.off()
+
+	# 6.3. Visualising the dispersal history of viral lineages among municipalities
 
 nberOfExtractionFiles = 100; tMRCAs = rep(NA, nberOfExtractionFiles)
 for (i in 1:nberOfExtractionFiles)
@@ -904,10 +793,10 @@ for (h in 1:2)
 dev.off()
 
 system(paste0("magick -units PixelsPerInch -density 1000 Figure_1_241125.pdf -background white -alpha remove -flatten Figure_1_241125.png"))
-system(paste0("magick -units PixelsPerInch -density 1000 Figure_2_101025.pdf -background white -alpha remove -flatten Figure_2_101025.png"))
+system(paste0("magick -units PixelsPerInch -density 1000 Figure_2_131225.pdf -background white -alpha remove -flatten Figure_2_131225.png"))
 system(paste0("magick -units PixelsPerInch -density 1000 Figure_S1_061125.pdf -background white -alpha remove -flatten Figure_S1_061125.png"))
 
-	# 7.3. Preparing the input files to generate an animated visualisation with spread.gl
+	# 6.4. Preparing the input files to generate an animated visualisation with spread.gl
 
 buffer = matrix(nrow=dim(centroids)[1], ncol=3); buffer[,1] = row.names(centroids)
 buffer[,3] = centroids[,1]; buffer[,2] = centroids[,2]; colnames(buffer) = c("location","latitude","longitude")
@@ -915,15 +804,18 @@ write.csv(buffer, paste0("BEAST_DTA_analysis/With_empirical_trees/Alignment_",an
 mcc_tre = readAnnotatedNexus(paste0("BEAST_DTA_analysis/With_empirical_trees/Alignment_",analysis,"_",nberOfExtractionFiles,".tree"))
 source("treeExtractions_MCC.r"); mcc_tab = treeExtractions_MCC(mcc_tre, mostRecentSamplingDatum)
 write.csv(mcc_tab, paste0("BEAST_DTA_analysis/With_empirical_trees/Alignment_",analysis,"_",nberOfExtractionFiles,".csv"), row.names=F, quote=F)
-	# --> problem: some start/endLocation are associated with NA values in the MCC tree (tree STATE_27200000, i.e. tree number 36):
-mcc_tab = read.csv(paste0("BEAST_DTA_analysis/With_empirical_trees/Alignment_",analysis,"_",nberOfExtractionFiles,"_ext/TreeExtractions_36.csv"), head=T)
+	# --> problem: some start/endLocation are associated with NA values in the MCC tree (tree STATE_107000000, i.e. tree number 35):
+mcc_tab = read.csv(paste0("BEAST_DTA_analysis/With_empirical_trees/Alignment_",analysis,"_",nberOfExtractionFiles,"_ext/TreeExtractions_35.csv"), head=T)
 colNames = c("id","type","length","start_time","end_time","start_name","start_lat","start_lon","end_name","end_lat","end_lon")
 buffer = matrix(nrow=dim(mcc_tab)[1], ncol=11); colnames(buffer) = colNames
 for (i in 1:dim(buffer)[1])
 	{
 		buffer[i,"id"] = i; buffer[i,"type"] = "internal"; buffer[i,"length"] = mcc_tab[i,"length"]
 		if (!mcc_tab[i,"node2"]%in%mcc_tab[,"node1"]) buffer[i,"type"] = "external"
-		buffer[i,"start_time"] = mcc_tab[i,"startYear"]; buffer[i,"end_time"] = mcc_tab[i,"endYear"]
+		buffer[i,"start_time"] = as.character(date_decimal(mcc_tab[i,"startYear"]))
+		buffer[i,"end_time"] = as.character(date_decimal(mcc_tab[i,"endYear"]))
+		buffer[i,"start_time"] = unlist(strsplit(buffer[i,"start_time"],"\\."))[1]
+		buffer[i,"end_time"] = unlist(strsplit(buffer[i,"end_time"],"\\."))[1]
 		buffer[i,"start_name"] = mcc_tab[i,"startLoc"]; buffer[i,"end_name"] = mcc_tab[i,"endLoc"]
 		index1 = which(row.names(centroids)==mcc_tab[i,"startLoc"])
 		index2 = which(row.names(centroids)==mcc_tab[i,"endLoc"])
@@ -932,7 +824,7 @@ for (i in 1:dim(buffer)[1])
 	}
 write.csv(buffer, paste0("BEAST_DTA_analysis/With_empirical_trees/Alignment_",analysis,"_mcc.csv"), row.names=F, quote=F)
 
-# 8. Analysing and reporting the results of the discrete-GLM analysis
+# 7. Analysing and reporting the results of the discrete-GLM analysis
 
 predictors = c("population_count_origin","population_count_destination","geographic_distances","pairwise_mobility_metric",
 			   "temperature_origin","temperature_destination","precipitation_origin","precipitation_destination")
@@ -953,4 +845,31 @@ for (i in 1:length(predictors))
 		
 	}
 write.csv(glm_results, paste0("BEAST_DTA_analysis/With_empirical_trees/Alignment_",analysis,"_glm.csv"), quote=F)
+
+# 8. Conducting complementary isolation-by-distance (IBD) analyses
+
+nberOfExtractionFiles = 100; rP2s = rep(NA, nberOfExtractionFiles)
+trees = read.nexus(paste0("BEAST_DTA_analysis/With_empirical_trees/Alignment_",analysis,"_",nberOfExtractionFiles,".trees"))
+for (i in 1:length(trees))
+	{
+		tab = read.csv(paste0("BEAST_DTA_analysis/With_empirical_trees/Alignment_",analysis,"_",nberOfExtractionFiles,"_ext/TreeExtractions_",i,".csv"), head=T)
+		distTree = as.matrix(distTips(trees[[i]], method="patristic"))
+		distsGeo = matrix(nrow=dim(distTree)[1], ncol=dim(distTree)[2])
+		for (j in 2:dim(distsGeo)[1])
+			{
+				for (k in 1:(j-1))
+					{
+						index1 = which(tab[,"tipLabel"]==row.names(distTree)[j])
+						index2 = which(tab[,"tipLabel"]==colnames(distTree)[k])
+						x1 = cbind(tab[index1,"endLon"], tab[index1,"endLat"])
+						x2 = cbind(tab[index2,"endLon"], tab[index2,"endLat"])
+						distsGeo[j,k] = rdist.earth(x1, x2, miles=F, R=NULL)
+						distsGeo[k,j] = distsGeo[j,k]
+					}
+			}
+		rP2s[i] = cor(distTree[lower.tri(distTree)],log(distsGeo[lower.tri(distsGeo)]+1), method="pearson")
+	}
+meanV = round(mean(rP2s), 3); hpd95 = round(hdi(rP2s)[1:2], 3)
+cat("rP2 = ",meanV,", 95% HPD = [",hpd95[1],", ",hpd95[2],"]\n",sep="")
+	# rP2 = 0.111, 95% HPD = [0.100, 0.127]
 
