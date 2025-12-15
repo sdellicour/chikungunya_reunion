@@ -566,7 +566,7 @@ for (i in 1:nberOfExtractionFiles)
 tree = readAnnotatedNexus(paste0("BEAST_DTA_analysis/With_empirical_trees/Alignment_",analysis,"_",nberOfExtractionFiles,".tree"))
 tab = read.table(paste0("Alignment_",analysis,".txt"), head=T)
 rootHeight = max(nodeHeights(tree)); root_time = mostRecentSamplingDatum-rootHeight
-node_dates = mostRecentSamplingDatum-nodeHeights(tree)[,2]
+node_dates = root_time+nodeHeights(tree)[,2]
 node_weeks = interval(min(ymd(tab[,"collection_date"])),date_decimal(node_dates))%/%weeks(1)+1
 node_weeks[node_weeks<1] = 1; nodes_cols = paste0(collection_week_cols1[node_weeks],"BF")
 
