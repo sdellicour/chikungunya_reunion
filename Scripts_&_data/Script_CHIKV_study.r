@@ -308,7 +308,7 @@ mtext("R0", side=1, col="gray30", cex=0.8, line=1.2)
 	# 5.2. Setting the parameters for an episodic birth-death-sampling (EBDS) analysis
 
 		# Estimation of the transmission period used to anchor the death rate: 8-15 days = 5-8 days of human infectiousness (Cauchemez et al. 2014;
-		# Eurosurveillance, SI data) + 3–7 days to take into account the mosquito extrinsic incubation period (EIP; Zhao et al. 2025, Biosaf. Health).
+		# Eurosurveillance, SI data) + 3-7 days to take into account the mosquito extrinsic incubation period (EIP; Zhao et al. 2025, Biosaf. Health).
 		# Note on the distinction between the death (mu) and sampling (psi) rates: mu and psi are distinct hazards running in parallel, with mu removing
 		# infectious lineages without observation (recovery, death, isolation), whereas psi governs observation events that create tips in the tree
 		# (and, under the usual “sampling with removal” setup, also terminate that lineage). With two competing exponential clocks, the chance a lineage
