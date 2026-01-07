@@ -7,11 +7,12 @@ library(lubridate)
 library(MetBrewer)
 library(seraphim)
 library(sf)
+library(treeio)
 
 analysis = "101025"
 showingPlots = FALSE
 
-# 1. Investigating the temporal signal associated with the alignment
+# 1. Investigating the temporal signal and sampling representativity
 # 2. Preliminary BEAST analysis to estimate the substitution rate
 # 3. Preparing the skygrid and discrete phylogeographic analyses
 # 4. Preparing the different predictors for the discrete-GLM analysis
@@ -25,7 +26,7 @@ mostRecentSamplingDatum = max(decimal_date(ymd(tab[,"collection_date"]))) # 2025
 admin0 = shapefile("GADM_REU_shapefile/GADM_REU_0.shp") # island borders
 admins2 = shapefile("GADM_REU_shapefile/GADM_REU_2.shp") # municipalities
 locations = unique(admins2@data[,"GID_2"]) # municipality IDs
-elevation = mask(crop(raster("Copernicus_DEM30.tif"), admin0), admin0)
+elevation = raster::mask(crop(raster("Copernicus_DEM30.tif"), admin0), admin0)
 elevation[elevation[]<0] = 0; elevation[elevation[]>3000] = 3000
 osm_lines = st_read("OpenStreetMap_files/OSM_25102014.pbf", layer="lines")
 osm_polygons = st_read("OpenStreetMap_files/OSM_25102014.pbf", layer="multipolygons")
@@ -33,12 +34,14 @@ main_roads = subset(osm_lines, highway%in%c("trunk","primary"))
 residential_areas = subset(osm_polygons, landuse=="residential")
 construction_areas = subset(osm_polygons, landuse=="construction")
 forest_areas = subset(osm_polygons, landuse=="forest")
-elevation_cols = paste0(divergingx_hcl(14,"fall")[4:14],"BF") # 75% transparency
+elevation_cols = paste0(divergingx_hcl(14,"fall")[4:14],"BF") # 65% transparency
 collection_week_cols1 = met.brewer(name="Hiroshige", n=60, type="continuous")[1:51]
 collection_week_cols2 = met.brewer(name="Hiroshige", n=60, type="continuous")[1:52]
 collection_month_cols = met.brewer(name="Hiroshige", n=14, type="continuous")[1:12]
 
-# 1. Investigating the temporal signal associated with the alignment
+# 1. Investigating the temporal signal and sampling representativity
+
+	# 1.1. Generating a second alignment and associated metadata files without outliers identified with the first TempEst analysis
 
 tre1 = read.tree(paste0("Temporal_signal_test1/Alignment_",analysis,".tre")); fas2 = c()
 tab1 = read.csv(paste0("Temporal_signal_test1/Alignment_",analysis,".csv"), head=T, sep=";")
@@ -62,6 +65,8 @@ write.table(tab2, paste0("Temporal_signal_test2/Alignment_",analysis,".txt"), ro
 write.tree(tre2, paste0("Temporal_signal_test2/Alignment_",analysis,".tre"))
 write(fas2, paste0("Temporal_signal_test2/Alignment_",analysis,".fas"))
 
+	# 1.2. Investigating the correlation between the number of genomic samples and the number of cases per week and per municipality
+
 tab1 = read.table(paste0("Temporal_signal_test1/TempEst_regression.txt"), head=T, sep="\t")
 tab2 = read.table(paste0("Temporal_signal_test2/TempEst_regression.txt"), head=T, sep="\t")
 lr1 = lm(distance ~ date, data=tab1); R2b = 0.67 # from the 1° root-to-tips regression analysis
@@ -79,6 +84,8 @@ lr3 = lm(sequences ~ cases, data=tab3); R2c = 0.90 # pretty good correlation bet
 tab4 = read.csv("Cases_municipality.csv", head=T)
 rP = cor(tab4[,"cases"], tab4[,"sequences"], method="pearson") # rP (Pearson) = 0.86
 lr4 = lm(sequences ~ cases, data=tab4); R2d = 0.75 # good correlation between the two
+
+	# 1.3. Visualising the root-to-tip regression analyses and the associations between the number of genomic samples and cases 
 
 pdf(paste0("Figure_S2_",analysis,"_NEW.pdf"), width=8, height=5) # dev.new(width=8, height=5)
 par(mfrow=c(2,2), oma=c(0,0.6,0.5,0), mar=c(3.3,4.5,0.5,1), lwd=0.3, bty="o", col="gray30", col.axis="gray30", fg="gray30")
@@ -132,8 +139,8 @@ dev.off()
 
 tab = read.csv(paste0("BEAST_first_analysis/Alignment_",analysis,".csv"), head=T)
 log = read.table(paste0("BEAST_first_analysis/Alignment_",analysis,".log"), head=T, sep="\t")
-ucld_mean = log[ceiling(0.1*dim(log)[1]):dim(log)[1],"ucld.mean"]
-tree = readAnnotatedNexus(paste0("BEAST_first_analysis/Alignment_",analysis,".tree"))
+ucld_mean = log[ceiling(0.1*dim(log)[1]):dim(log)[1],"ucld.mean"] # substitution rate
+tree = readAnnotatedNexus(paste0("BEAST_first_analysis/Alignment_",analysis,".tree")) # MCC tree
 rootHeight = max(nodeHeights(tree)); root_time = mostRecentSamplingDatum-rootHeight
 minYear = mostRecentSamplingDatum-tree$root.annotation$`height_95%_HPD`[[2]]
 maxYear = mostRecentSamplingDatum; nodes_cols = c(); locations = c()
@@ -141,7 +148,7 @@ locations = unique(tab[,"location"]); locations = locations[order(locations)]
 location_cols = colorRampPalette(brewer.pal(11,"Spectral"))(length(locations))
 location_cols = c("#FAA521","#4676BB","#D1E5F0","#C0C0C0","#6A3D9A","#DE4327","#BF812D")
 
-pdf(paste0("Figure_S3_",analysis,"_NEW1.pdf"), width=8, height=3.5) # dev.new(width=8, height=4)
+pdf(paste0("Figure_S3A_",analysis,"_NEW.pdf"), width=8, height=3.5) # dev.new(width=8, height=4)
 par(oma=c(0,0,0,0), mar=c(0.8,2.2,4.3,0), lwd=0.3, bty="o", col="gray30", col.axis="gray30", fg="gray30", lheight=0.85)
 plot(tree, show.tip.label=F, show.node.label=F, edge.width=0.7, cex=0.6, align.tip.label=3, direction="downwards",
 	 y.lim=c(0,rootHeight), col="gray30", edge.color="gray30")
@@ -183,7 +190,7 @@ legend(x=130, y=60, gsub("_"," ",locations)[indices], col=location_cols[indices]
 legend(x=130, y=60, gsub("_"," ",locations)[indices], col="gray30", text.col=rgb(0,0,0,0), pch=1, pt.cex=1.25, box.lty=0, cex=0.65, pt.lwd=0.3, x.intersp=0.8, y.intersp=1.1)
 dev.off() # two manual edits to conduct in Illustrator: (i) removing the clipping mask on the tree, and (ii) putting the horizontal bars behind
 
-pdf(paste0("Figure_S3_",analysis,"_NEW2.pdf"), width=3, height=1.5) # dev.new(width=3, height=2)
+pdf(paste0("Figure_S3B_",analysis,"_NEW.pdf"), width=3, height=1.5) # dev.new(width=3, height=2)
 par(oma=c(0,0,0,0), mar=c(1.5,2,0.7,1), lwd=0.3, bty="o", col="gray30", col.axis="gray30", fg="gray30")
 plot(density(ucld_mean), axes=F, ann=F, col=NA); polygon(stats::density(ucld_mean), col="#DE43274D", border=NA); lines(density(ucld_mean), col="#DE4327", lwd=1)
 ats = seq(0.0002,0.0007,0.0001); labels = c("",expression("3x10"^"-4"),expression("4x10"^"-4"),expression("5x10"^"-4"),expression("6x10"^"-4"),"")
@@ -404,7 +411,6 @@ skg_sa = skg_sa[,c("time","median","lower","upper")]; colnames(skg_sa) = c("time
 skg_sa[,"median"] = log(skg_sa[,"median"]+1); timeSlice = skg_sa[1,"time"]-skg_sa[2,"time"]; skg_weeks = 51:1
 skg_sa[,"95pHDP_lower"] = log(skg_sa[,"95pHDP_lower"]+1); skg_sa[,"95pHDP_upper"] = log(skg_sa[,"95pHDP_upper"]+1)
 ebdsRt = read.table(paste0("BEAST_DTA_analysis/Without_DTA_model/Alignment_",analysis,"_ebds.log"), head=T, sep="\t")
-burnIn = round(((dim(ebdsRt)[1]-1)/10)+1); ebdsRt = ebdsRt[(burnIn+1):dim(ebdsRt)[1],]
 cutOff = 1; nberOfPoints = sum(grepl("effectiveReproductiveNumber",colnames(ebdsRt)))
 Rts = matrix(nrow=nberOfPoints, ncol=4); colnames(Rts) = c("time","median","95pHDP_lower","95pHDP_upper")
 minYear = mostRecentSamplingDatum-1; maxYear = mostRecentSamplingDatum; interval = 1/nberOfPoints
@@ -434,48 +440,7 @@ for (i in 1:length(selected_months))
 		climatic_variables[i,"precipitation"] = mean(climatic_data[which(climatic_data[,"AAAAMM"]==selected_months[i]),"RR"]) # mm
 	}
 
-pdf(paste0("Figure_1B_",analysis,"_NEW1.pdf"), width=8/2, height=8/2) # dev.new(width=8/2, height=8/2)
-par(mfrow=c(3,1), oma=c(0,0,0,0), mar=c(2.0,3.5,0.1,0.5), lwd=0.3, bty="o", col="gray30", col.axis="gray30", fg="gray30")
-hist(decimal_date(ymd(tab[,"collection_date"])), breaks=51, col="gray70", border=NA, axes=F, ann=F, ylim=c(0,380), xlim=c(2024.62,2025.59))
-hist(decimal_date(ymd(tab[,"collection_date"])), breaks=51, col=paste0(collection_week_cols1,"BF"), add=T)
-dates = c("2024-08-07","2024-09-01","2024-10-01","2024-11-01","2024-12-01","2025-01-01","2025-02-01","2025-03-01","2025-04-01","2025-05-01","2025-06-01","2025-07-01","2025-08-08")
-ats1 = decimal_date(ymd(dates)); ats2 = ats1[2:(length(ats1)-1)]; labels1 = gsub("-","\\/",dates[2:(length(dates)-1)])
-axis(side=1, lwd=0.5, cex.axis=0.7, mgp=c(0,0.17,0), lwd.tick=0, col.lab="gray30", col="gray30", tck=-0.04, las=1, at=ats1, label=rep("",length(ats1)))
-axis(side=1, lwd=0, cex.axis=0.7, mgp=c(0,0.17,0), lwd.tick=0.5, col.lab="gray30", col="gray30", tck=-0.04, las=1, at=ats2, label=labels1)
-axis(side=2, lwd=0.5, cex.axis=0.7, mgp=c(0,0.4,-0.1), lwd.tick=0.5, col.lab="gray30", col="gray30", tck=-0.04, las=1, padj=0.4, at=seq(0,300,100))
-mtext("Genomic samples", side=2, col="gray30", cex=0.6, line=1.7, las=3)
-vS = climatic_variables[,"temperature"]; dates = climatic_variables[,"date"]
-plot(dates, vS, type="l", lwd=0.8, col=collection_week_cols1[1], ylim=c(min(vS),max(vS)+(0.2*(max(vS)-min(vS)))), xlim=c(2024.62,2025.59), ann=F, axes=F)
-points(climatic_variables[,"date"], climatic_variables[,"temperature"], pch=16, cex=0.8, col=collection_week_cols1[1]) # red
-axis(side=1, lwd=0.5, cex.axis=0.7, mgp=c(0,0.17,0), lwd.tick=0, col.lab="gray30", col="gray30", tck=-0.04, las=1, at=ats1, label=rep("",length(ats1)))
-axis(side=1, lwd=0, cex.axis=0.7, mgp=c(0,0.17,0), lwd.tick=0.5, col.lab="gray30", col="gray30", tck=-0.04, las=1, at=ats2, label=labels1)
-axis(side=2, lwd=0.5, cex.axis=0.7, mgp=c(0,0.4,-0.1), lwd.tick=0.5, col.lab="gray30", col="gray30", tck=-0.04, las=1, padj=0.4)
-mtext("Temperature (°C)", side=2, col="gray30", cex=0.6, line=1.7, las=3)
-par(new=T)
-vS = climatic_variables[,"precipitation"]; dates = climatic_variables[,"date"]
-plot(dates, vS, type="l", lwd=0.8, col=collection_week_cols1[length(collection_week_cols1)], ylim=c(min(vS),max(vS)+(0.2*(max(vS)-min(vS)))), xlim=c(2024.62,2025.59), ann=F, axes=F)
-points(climatic_variables[,"date"], climatic_variables[,"precipitation"], pch=16, cex=0.8, col=collection_week_cols1[length(collection_week_cols1)]) # blue
-axis(side=4, lwd=0.5, cex.axis=0.7, mgp=c(0,0.4,-0.1), lwd.tick=0.5, col.lab="gray30", col="gray30", tck=-0.04, las=1, padj=0.4)
-plot(R_dates, R_median, lwd=0.7, type="l", cex.axis=0.8, cex.lab=0.8, col="gray30", axes=F, xlab=NA, ylab=NA, ylim=c(0,9.6), xlim=c(2024.62,2025.59))
-xx_l = c(R_dates,rev(R_dates)); yy_l = c(R_lower,rev(R_upper)); polygon(xx_l,yy_l,col=rgb(187/255,187/255,187/255,0.25),border=0)
-for (i in 1:length(R_dates))
-	{
-		week = interval(min(ymd(tab[,"collection_date"])),date_decimal(R_dates[i]))%/%weeks(1)+1
-		colour = paste0(collection_week_cols1[week],"BF")
-		x1 = R_dates[i]-(timeSlice/2); x2 = R_dates[i]+(timeSlice/2)
-		y1 = R_lower[i]-1; y2 = R_upper[i]+1
-		polygon(c(x1,x2,x2,x1), c(y1,y1,y2,y2), col="gray70", border=NA)
-		polygon(c(x1,x2,x2,x1), c(y1,y1,y2,y2), col=colour, border=NA)
-	}
-getOption("scipen"); opt = options("scipen"=20); polygon(xx_l,yy_l,col="NA",border="gray30")
-lines(R_dates, R_median, lwd=0.3, type="l", cex.axis=0.8, cex.lab=0.8, col="gray30"); abline(h=1, lty=2, lwd=0.3, col="gray30")
-axis(side=1, lwd=0.5, cex.axis=0.7, mgp=c(0,0.17,0), lwd.tick=0, col.lab="gray30", col="gray30", tck=-0.04, las=1, at=ats1, label=rep("",length(ats1)))
-axis(side=1, lwd=0, cex.axis=0.7, mgp=c(0,0.17,0), lwd.tick=0.5, col.lab="gray30", col="gray30", tck=-0.04, las=1, at=ats2, label=labels1)
-axis(side=2, lwd=0.5, cex.axis=0.7, mgp=c(0,0.4,-0.1), lwd.tick=0.5, col.lab="gray30", col="gray30", tck=-0.04, las=1, padj=0.4)
-mtext("Effective reproduction number", side=2, col="gray30", cex=0.55, line=1.7, las=3)
-dev.off()
-
-pdf(paste0("Figure_1B_",analysis,"_NEW2.pdf"), width=8/2, height=8/2) # dev.new(width=8/2, height=8/2)
+pdf(paste0("Figure_1B_",analysis,"_NEW.pdf"), width=8/2, height=8/2) # dev.new(width=8/2, height=8/2)
 par(mfrow=c(3,1), oma=c(0,0,0,0), mar=c(2.0,3.5,0.1,0.5), lwd=0.3, bty="o", col="gray30", col.axis="gray30", fg="gray30")
 hist(decimal_date(ymd(tab[,"collection_date"])), breaks=52, col="gray70", border=NA, axes=F, ann=F, ylim=c(0,380), xlim=c(2024.62,2025.59))
 hist(decimal_date(ymd(tab[,"collection_date"])), breaks=52, col=paste0(collection_week_cols1,"BF"), add=T)
@@ -526,24 +491,22 @@ dev.off()
 
 # 6. Discrete phylogeographic analysis based on the municipalities
 
+nberOfTreesToSample = 100; nberOfExtractionFiles = nberOfTreesToSample
+
 	# 6.1. Extracting the spatio-temporal information embedded in posterior trees
 
-nberOfTreesToSample = 100; nberOfExtractionFiles = nberOfTreesToSample; burnIn = 251
-log = scan(paste0("BEAST_DTA_analysis/With_empirical_trees/Alignment_",analysis,"_emp1.log"), what="", sep="\n", quiet=T, blank.lines.skip=F)
-index1 = 5+burnIn; index2 = length(log); interval = round((index2-index1)/nberOfTreesToSample)
-indices = seq(index2-((nberOfTreesToSample-1)*interval),index2,interval)
-write(log[c(4,indices)], paste0("BEAST_DTA_analysis/With_empirical_trees/Alignment_",analysis,"_",nberOfExtractionFiles,".log"))
+		# 6.1.1. Extracting the lineage transition events for the visualisations
+
 trees = scan(paste0("BEAST_DTA_analysis/With_empirical_trees/Alignment_",analysis,"_emp1.trees"), what="", sep="\n", quiet=T, blank.lines.skip=F)
-index1 = which(trees=="\t\t;")[length(which(trees=="\t\t;"))]; index2 = index1 + burnIn + 1
+burnIn = 251; index1 = which(trees=="\t\t;")[length(which(trees=="\t\t;"))]; index2 = index1 + burnIn + 1
 indices3 = which(grepl("tree STATE",trees)); index3 = indices3[length(indices3)]
 interval = floor((index3-(index1+burnIn))/nberOfTreesToSample)
 indices = seq(index3-((nberOfTreesToSample-1)*interval),index3,interval)
 selected_trees = c(trees[c(1:index1,indices)],"End;")
-write(selected_trees, paste0("BEAST_DTA_analysis/With_empirical_trees/Alignment_",analysis,"_",nberOfExtractionFiles,".trees"))
+write(selected_trees, paste0("BEAST_DTA_analysis/With_empirical_trees/Alignment_",analysis,"_",nberOfExtractionFiles,"_1.trees"))
 
 source("treeExtractions_DTA.r")
-trees = readAnnotatedNexus(paste0("BEAST_DTA_analysis/With_empirical_trees/Alignment_",analysis,"_",nberOfExtractionFiles,".trees"))
-# trees = readAnnotatedNexus(paste0("Alignment_",analysis,"_emp1.trees"))[[2]]
+trees = readAnnotatedNexus(paste0("BEAST_DTA_analysis/With_empirical_trees/Alignment_",analysis,"_",nberOfExtractionFiles,"_1.trees"))
 for (i in 1:nberOfExtractionFiles)
 	{
 		if (length(trees) == 1) dta_tab = treeExtractions_DTA(trees, mostRecentSamplingDatum)	
@@ -551,7 +514,6 @@ for (i in 1:nberOfExtractionFiles)
 		write.csv(dta_tab, paste0("BEAST_DTA_analysis/With_empirical_trees/Alignment_",analysis,"_",nberOfTreesToSample,"_ext/TreeExtractions_",i,".csv"), row.names=F, quote=F)
 	}
 samplingCoordinates = read.csv(paste0("Alignment_",analysis,".csv"), head=T, sep=";")
-# trees = read.nexus(paste0("BEAST_DTA_analysis/With_empirical_trees/Alignment_",analysis,"_",nberOfExtractionFiles,".trees"))
 for (i in 1:nberOfExtractionFiles)
 	{
 		tab1 = read.csv(paste0("BEAST_DTA_analysis/With_empirical_trees/Alignment_",analysis,"_",nberOfTreesToSample,"_ext/TreeExtractions_",i,".csv"), head=T)
@@ -588,7 +550,329 @@ for (i in 1:nberOfExtractionFiles)
 			}
 	}
 
-	# 6.2. Visualisation of the time-scaled phylogenetic inference (based on the MCC tree)
+		# 6.1.2. Extracting the Markov jumps for the Shannon entropy estimates
+
+trees = treeio::read.beast(paste0("BEAST_DTA_analysis/With_empirical_trees/Alignment_",analysis,"_emp2.trees")); tabs = list(); ii = 0
+for (i in 251:length(trees)) # to discard the 250 first sampled trees as burn-in
+	{
+		tip_depths = node.depth.edgelength(as.phylo(trees[[i]])); max_depth = max(tip_depths)
+		tab = as.data.frame(as_tibble(trees[[i]]))
+		tab$height = max_depth - tip_depths
+		history = tab[,c("node","history")]
+		tab = tab[-which(tab[,"parent"]==tab[,"node"]),]
+		colnames(tab) = c("node1","node2","length","tipLabel","history","endLoc","height2")
+		tmp = matrix(nrow=dim(tab)[1], ncol=2)
+		colnames(tmp) = c("height1","startLoc"); tab = cbind(tab,tmp)
+		tab = tab[,c("node1","node2","height1","height2","length","startLoc","endLoc","tipLabel","history")]
+		for (j in 1:dim(tab)[1])	
+			{
+				index = which(tab[,"node2"]==tab[j,"node1"])
+				if (length(index) == 1)
+					{
+						tab[j,"height1"] = tab[index,"height2"]; tab[j,"startLoc"] = tab[index,"endLoc"]
+					}
+			}
+		tmp = c(); n = 0
+		for (j in 1:dim(tab)[1])
+			{
+				if (is.na(tab$history[[j]])[1])
+					{
+						tmp = rbind(tmp, tab[j,])
+					}
+				if (!is.na(tab$history[[j]])[1])
+					{
+						MJs = c()
+						for (k in 1:length(tab$history[[j]]))
+							{
+								if (grepl("\\{",tab$history[[j]][k]))
+									{
+										MJs = rbind(MJs,cbind(tab$history[[j]][k+1],gsub("\\}","",tab$history[[j]][k+2]),gsub("\\{","",tab$history[[j]][k])))
+									}
+							}
+						sub_branches = c()
+						for (k in 1:dim(MJs)[1])
+							{
+								sub_branch = tab[j,]; n = n+1
+								if (k == 1)
+									{
+										sub_branch[,"node2"] = paste0("i",n)
+										sub_branch[,"height2"] = MJs[k,3]
+										sub_branch[,"endLoc"] = MJs[k,2]	
+									}
+								if (k > 1)
+									{
+										sub_branch[,"node1"] = sub_branches[k-1,"node2"]
+										sub_branch[,"height1"] = as.numeric(sub_branches[k-1,"height2"])
+										sub_branch[,"startLoc"] = sub_branches[k-1,"endLoc"]
+										sub_branch[,"node2"] = paste0("i",n)
+										sub_branch[,"height2"] = MJs[k,3]
+										sub_branch[,"endLoc"] = MJs[k,2]
+									}
+								sub_branch[,"length"] = sub_branch[,"height1"]-as.numeric(sub_branch[,"height2"])
+								sub_branches = rbind(sub_branches, sub_branch)
+							}
+						sub_branch = tab[j,]
+						sub_branch[,"node1"] = sub_branches[dim(MJs)[1],"node2"]
+						sub_branch[,"height1"] = as.numeric(sub_branches[dim(MJs)[1],"height2"])
+						sub_branch[,"startLoc"] = sub_branches[dim(MJs)[1],"endLoc"]
+						sub_branch[,"length"] = sub_branch[,"height1"]-as.numeric(sub_branch[1,"height2"])
+						sub_branches = rbind(sub_branches, sub_branch)
+						tmp = rbind(tmp, sub_branches)
+					}
+			}
+		ii = ii+1; tabs[[ii]] = tmp
+	}
+saveRDS(tabs, paste0("BEAST_DTA_analysis/With_empirical_trees/Alignment_",analysis,"_emp3.rds"))
+
+		# 6.1.3. Averaging the Markov jumps for the overall and four time periods
+
+if (!file.exists(paste0("BEAST_DTA_analysis/With_empirical_trees/Alignment_",analysis,"_",nberOfExtractionFiles,"_3.csv")))
+	{
+		tab = read.table(paste0("BEAST_DTA_analysis/With_empirical_trees/Alignment_",analysis,"_emp3.txt"), head=T)
+		MJs = matrix(nrow=dim(admins2@data)[1], ncol=dim(admins2@data)[1]); states = unique(tab[,"state"])
+		for (i in 1:dim(admins2@data)[1])
+			{
+				for (j in 1:dim(admins2@data)[1])
+					{
+						sub = tab[which((tab[,"from"]==admins2@data[i,"GID_2"])&(tab[,"to"]==admins2@data[j,"GID_2"])),]
+						MJs_post = c(); # print(c(i,j))
+						for (k in 1:length(states))
+							{
+								MJ = which(sub[,"state"]==states[k])
+								MJs_post = c(MJs_post, length(MJ))
+							}
+						MJs[i,j] = mean(MJs_post)
+					}
+			}
+		row.names(MJs) = admins2@data[,"GID_2"]; colnames(MJs) = admins2@data[,"GID_2"]
+		write.table(MJs, paste0("BEAST_DTA_analysis/With_empirical_trees/Alignment_",analysis,"_emp3.csv"), quote=F, sep=",")
+	}
+MJs = read.csv(paste0("BEAST_DTA_analysis/With_empirical_trees/Alignment_",analysis,"_",nberOfExtractionFiles,"_3.csv"), header=T)
+log = read.table(paste0("BEAST_DTA_analysis/With_empirical_trees/Alignment_",analysis,"_emp1.log"), header=T)
+log = log[(which(log[,"state"]==25100000)+1):dim(log)[1],]
+BFs = matrix(nrow=dim(admins2@data)[1], ncol=dim(admins2@data)[1])
+row.names(BFs) = admins2@data[,"GID_2"]; colnames(BFs) = admins2@data[,"GID_2"]
+for (i in 1:dim(admins2@data)[1])
+	{
+		for (j in 1:dim(admins2@data)[1])
+			{
+				if (i != j)
+					{
+						colName = paste0("location.indicators.",admins2@data[i,"GID_2"],".",admins2@data[j,"GID_2"])
+						index1 = which(colnames(log)==colName)
+						p = sum(log[,index1]==1)/dim(log)[1]
+						K = dim(admins2@data)[1]
+						q = (log(2)+K-1)/(K*(K-1))
+						BFs[i,j] = (p/(1-p))/(q/(1-q))
+					}
+			}
+	}
+for (i in 1:dim(admins2@data)[1])
+	{
+		for (j in 1:dim(admins2@data)[1])
+			{
+				if ((MJs[i,j] > 1)&(BFs[i,j] < 3)) cat(admins2@data[i,"GID_2"]," - ",admins2@data[j,"GID_2"],": MJ = ",MJs[i,j],"\n",sep="") # none
+			}
+	}
+MJs[BFs<3] = NA; BFs = round(BFs, 1)
+cutOffs = c(decimal_date(ymd(c("2025-01-01","2025-03-01","2025-05-01","2025-09-01"))))
+for (h in 1:length(cutOffs))
+	{
+		tab = read.table(paste0("BEAST_DTA_analysis/With_empirical_trees/Alignment_",analysis,"_emp3.txt"), head=T)
+		tab[,"time"] = mostRecentSamplingDatum-tab[,"time"]
+		if (h == 1) tab = tab[which(tab[,"time"]<cutOffs[h]),]
+		if (h > 1) tab = tab[which((tab[,"time"]>=cutOffs[h-1])&(tab[,"time"]<cutOffs[h])),]
+		MJs = matrix(nrow=dim(admins2@data)[1], ncol=dim(admins2@data)[1]); states = unique(tab[,"state"])
+		for (i in 1:dim(admins2@data)[1])
+			{
+				for (j in 1:dim(admins2@data)[1])
+					{
+						sub = tab[which((tab[,"from"]==admins2@data[i,"GID_2"])&(tab[,"to"]==admins2@data[j,"GID_2"])),]
+						MJs_post = c(); # print(c(i,j))
+						for (k in 1:length(states))
+							{
+								MJ = which(sub[,"state"]==states[k])
+								MJs_post = c(MJs_post, length(MJ))
+							}
+						MJs[i,j] = mean(MJs_post)
+					}
+			}
+		row.names(MJs) = admins2@data[,"GID_2"]; colnames(MJs) = admins2@data[,"GID_2"]
+		write.table(MJs, paste0("BEAST_DTA_analysis/With_empirical_trees/Alignment_",analysis,"_MJt",h,".csv"), quote=F, sep=",")
+	}
+
+	# 6.2. Computing a normalised Shannon entropy through time for each municipality
+
+		# 6.2.1. First approach based on lineage transition events transition events
+
+entropies = list()
+selected_periods = c("2024-08","2024-09","2024-10","2024-11","2024-12","2025-01","2025-02","2025-03","2025-04","2025-05","2025-06","2025-07","2025-08")
+selected_periods = c("2024-08"); last_period = "2025-09" # to select the overall period
+for (i in 1:dim(admins2@data)[1])
+	{
+		admin2 = admins2@data[i,"GID_2"]; buffer = matrix(nrow=nberOfExtractionFiles, ncol=length(selected_periods))
+		for (j in 1:nberOfExtractionFiles)
+			{
+				tab = read.csv(paste0("BEAST_DTA_analysis/With_empirical_trees/Alignment_",analysis,"_",nberOfTreesToSample,"_ext/TreeExtractions_",j,".csv"), head=T)
+				for (k in 1:length(selected_periods))
+					{
+						date1 = decimal_date(ymd(paste0(selected_periods[k],"-01")))
+						if (k < length(selected_periods))
+							{
+								date2 = decimal_date(ymd(paste0(selected_periods[k+1],"-01")))
+							}	else	{
+								date2 = decimal_date(ymd(paste0(last_period,"-01")))
+							}
+						sub1 = tab[which((tab[,"endYear"]>=date1)&(tab[,"endYear"]<date2)),]
+						if (dim(sub1)[1] > 0)
+							{
+								sub2 = sub1[which((sub1[,"startLoc"]==admin2)|(sub1[,"endLoc"]==admin2)),]
+								if (dim(sub2)[1] == 0) print(c(i,j,k))
+								for (l in 1:dim(sub2)[1])
+									{
+										if (sub2[l,"startLoc"] != sub2[l,"endLoc"]) sub2[l,"length"] = sub2[l,"length"]/2
+									}
+								if (dim(sub2)[1] > 0)
+									{			
+										t_total = sum(sub2[,"length"])
+										partitions = matrix(nrow=dim(sub2)[1], ncol=1)
+										roots = which(!sub2[,"node1"]%in%sub2[,"node2"])
+										for (l in 1:length(roots))
+											{
+												partitions[roots[l],1] = l
+											}
+										while (sum(is.na(partitions[,1])) != 0)
+											{
+												for (l in 1:dim(partitions)[1])
+													{
+														if (is.na(partitions[l,1]))
+															{
+																ancestor = which(sub2[,"node2"]==sub2[l,"node1"])
+																if (!is.na(partitions[ancestor,1]))
+																	{
+																		partitions[l,1] = partitions[ancestor,1]
+																	}
+															}
+													}
+											}
+										entropy = 0; n = length(unique(partitions[,1]))
+										for (l in 1:n)
+											{
+												t = sum(sub2[which(partitions[,1]==l),"length"]); p = t/t_total
+												entropy = entropy + (p*log(p))
+											}
+										buffer[j,k] = -entropy/log(n)
+									}
+							}
+					}
+			}
+		if (length(selected_periods) == 1)
+			{
+				meanV = round(mean(buffer[,1], na.rm=T),3); hpd95 = round(HDInterval::hdi(buffer[,1]),3)
+				cat(admin2,": mean Shannon entropy = ",meanV,", 95% HPD = [",hpd95[1],", ",hpd95[2],"]\n",sep="")
+			}
+		entropies[[i]] = buffer
+	}
+
+		# 6.2.2. Second approach based on Markov jumps (like in Lemey et al. 2021, Nature)
+
+entropies = list()
+tabs = readRDS(paste0("BEAST_DTA_analysis/With_empirical_trees/Alignment_",analysis,"_emp3.rds"))
+for (i in 1:dim(admins2@data)[1])
+	{
+		admin2 = admins2@data[i,"GID_2"]; buffer = matrix(nrow=length(tabs), ncol=1)
+		for (j in 1:length(tabs))
+			{
+				sub = tabs[[j]][which(tabs[[j]][,"startLoc"]==admin2),]
+				if (dim(sub)[1] == 0) print(c(i,j,k))
+				if (dim(sub)[1] > 0)
+					{			
+						t_total = sum(sub[,"length"])
+						partitions = matrix(nrow=dim(sub)[1], ncol=1)
+						roots = which(!sub[,"node1"]%in%sub[,"node2"])
+						for (l in 1:length(roots))
+							{
+								partitions[roots[l],1] = l
+							}
+						while (sum(is.na(partitions[,1])) != 0)
+							{
+								for (l in 1:dim(partitions)[1])
+									{
+										if (is.na(partitions[l,1]))
+											{
+												ancestor = which(sub[,"node2"]==sub[l,"node1"])
+												if (!is.na(partitions[ancestor,1]))
+													{
+														partitions[l,1] = partitions[ancestor,1]
+													}
+											}
+									}
+							}
+						entropy = 0; n = length(unique(partitions[,1]))
+						for (l in 1:n)
+							{
+								t = sum(sub[which(partitions[,1]==l),"length"]); p = t/t_total
+								entropy = entropy + (p*log(p))
+							}
+						buffer[j,k] = -entropy/log(n)
+					}
+			}
+		meanV = round(mean(buffer[,1], na.rm=T),3); hpd95 = round(HDInterval::hdi(buffer[,1]),3)
+		cat(admin2,": mean Shannon entropy = ",meanV,", 95% HPD = [",hpd95[1],", ",hpd95[2],"]\n",sep="")
+		entropies[[i]] = buffer
+	}
+
+		# 6.2.3. Investigating the correlation between entropy estimates and population counts
+
+population_counts = read.csv("GLM_predictors_data/Prepared_predictors/Population_counts.csv", head=T)
+mean_entropies = population_counts; mean_entropies[,2] = NA; colnames(mean_entropies)[2] = "mean_entropy"
+for (i in 1:dim(admins2@data)[1]) mean_entropies[i,2] = mean(entropies[[i]][,1], na.rm=T)
+indices = which(!is.na(mean_entropies[,2])); v = cor(population_counts[indices,2], mean_entropies[indices,2], method="spearman")
+cor.test(population_counts[indices,2], mean_entropies[indices,2], method="spearman", alternative="less") # rS = 0.190
+n = 10000; vS_permutations = rep(NA, n); x = population_counts[indices,2]; y = mean_entropies[indices,2]
+for (i in 1:n) vS_permutations[i] = cor(x, sample(y, length(y), replace=F), method="spearman")
+pValue = sum(v > vS_permutations)/n # p-value = 0.818
+
+		# 6.2.4. Generation of the graphic with the median and 95% HPD for each municipality
+
+tab_entropies = as.data.frame(matrix(nrow=dim(admins2@data)[1], ncol=5)); writingFiles = FALSE
+tab_entropies[,1] = c(1:dim(admins2@data)[1]); tab_entropies[,2] = admins2@data[,"GID_2"]
+colnames(tab_entropies) = c("municipality_index","municipality","median","95pHDP_lower","95pHDP_upper")
+for (i in 1:dim(admins2@data)[1])
+	{
+		tab_entropies[i,"median"] = median(entropies[[i]][,1]); hpd95 = HDInterval::hdi(entropies[[i]][,1])
+		tab_entropies[i,"95pHDP_lower"] = hpd95[1]; tab_entropies[i,"95pHDP_upper"] = hpd95[2]
+	}
+higherThan050 = sum(tab_entropies[,"95pHDP_lower"]>0.5); higherThan075 = sum(tab_entropies[,"95pHDP_lower"]>0.75) # 19 and 13/24
+buffer = tab_entropies[,2:dim(tab_entropies)[2]]; buffer[,2] = round(as.numeric(buffer[,2]),4)
+buffer[,3] = round(as.numeric(buffer[,3]),4); buffer[,4] = round(as.numeric(buffer[,4]),4)
+if (writingFiles) write.csv(buffer, "Shannon_entropies.csv", row.names=F, quote=F)
+
+pdf(paste0("Figure_S5_",analysis,"_NEW.pdf"), width=8, height=2.2) # dev.new(width=8, height=2.2)
+par(oma=c(0,0,0,0), mar=c(3.0,3.0,0.5,0.0), lwd=0.3, bty="o", col="gray30", col.axis="gray30", fg="gray30")
+plot(tab_entropies[,"municipality_index"], tab_entropies[,"median"], col=NA, axes=F, xlab=NA, ylab=NA, ylim=c(0,1))
+abline(h=0.5, col="gray50", lwd=1, lty=2); abline(h=0.75, col="gray50", lwd=1, lty=2)
+for (i in 1:dim(tab_entropies)[1])
+	{
+		colour = rgb(70,118,187,100,maxColorValue=255) # blue
+		x1 = tab_entropies[i,"municipality_index"]-0.45
+		x2 = tab_entropies[i,"municipality_index"]+0.45
+		y1 = tab_entropies[i,"95pHDP_lower"]; y2 = tab_entropies[i,"95pHDP_upper"]
+		polygon(c(x1,x2,x2,x1), c(y1,y1,y2,y2), col=colour, border="gray30")
+		x1 = tab_entropies[i,"municipality_index"]-0.44
+		x2 = tab_entropies[i,"municipality_index"]+0.44
+		y1 = tab_entropies[i,"median"]; y2 = tab_entropies[i,"median"]
+		lines(c(x1,x2), cbind(y1,y2), lwd=1, col="gray30")
+		# polygon(c(x1,x2,x2,x1), c(y1,y1,y2,y2), col="gray30", border=2)
+	}
+ats = c(1:dim(tab_entropies)[1]); labels = admins2@data[,"NAME_2"]
+axis(side=1, lwd=0.5, cex.axis=0.7, mgp=c(0,0.17,0), lwd.tick=0, col.lab="gray30", col="gray30", tck=-0.04, las=1, at=c(-2,dim(tab_entropies)[1]+2))
+axis(side=1, lwd=0, cex.axis=0.7, mgp=c(0,0.50,0), lwd.tick=0.5, col.lab="gray30", col="gray30", tck=-0.04, las=2, at=ats, label=labels)
+axis(side=2, lwd=0.5, cex.axis=0.7, mgp=c(0,0.4,-0.1), lwd.tick=0.5, col.lab="gray30", col="gray30", tck=-0.04, las=1, padj=0.4)
+mtext("Normalised Shannon entropy", side=2, col="gray30", cex=0.7, line=1.7, las=3)
+dev.off()
+
+	# 6.3. Visualisation of the time-scaled phylogenetic inference (based on the MCC tree)
 
 tree = readAnnotatedNexus(paste0("BEAST_DTA_analysis/With_empirical_trees/Alignment_",analysis,"_",nberOfExtractionFiles,".tree"))
 tab = read.table(paste0("Alignment_",analysis,".txt"), head=T)
@@ -612,7 +896,7 @@ for (i in 1:dim(tree$edge)[1])
 add.scale.bar(x=0.37, y=-0.9, length=NULL, ask=F, lwd=0.5 , lcol="gray30", cex=0.7)
 dev.off()
 
-	# 6.3. Visualising the dispersal history of viral lineages among municipalities
+	# 6.4. Visualising the dispersal history of viral lineages among municipalities
 
 nberOfExtractionFiles = 100; tMRCAs = rep(NA, nberOfExtractionFiles)
 for (i in 1:nberOfExtractionFiles)
@@ -675,10 +959,11 @@ city_name_coordinates = rbind(cbind(55.4185,-20.9145),cbind(55.2492,-21.0033),
 	cbind(55.4277,-21.3689),cbind(55.5153,-21.2709),cbind(55.6179,-20.9854),cbind(55.3499,-21.3176),
 	cbind(55.2473,-20.9507),cbind(55.7690,-21.0375),cbind(55.5900,-21.4130),cbind(55.5790,-20.8934))
 
-pdf(paste0("Figure_2_",analysis,".pdf"), width=8, height=7.2) # dev.new(width=8, height=7.2)
+pdf(paste0("Figure_2_",analysis,"_NEW.pdf"), width=8, height=7.2); using_MJs = FALSE # dev.new(width=8, height=7.2)
 par(mfrow=c(2,2), oma=c(0,0,0,0), mar=c(0.0,0.0,0.0,0), lwd=0.3, bty="o", col="gray30", col.axis="gray30", fg="gray30", lheight=0.85)
 for (h in 1:length(cutOffs))
 	{
+		multiplier1 = 500; multiplier2 = 2; multiplier3 = 0.1
 		plot(admin0, col=NA, border=NA); plot(elevation, add=T, legend=F, col=elevation_cols)
 		plot(residential_areas$geometry, add=T, border=NA, col=rgb(77,77,77,120,maxColorValue=255))
 		if (h == 1) plot(admins2, add=T, col=NA, border="white", lwd=0.3)
@@ -686,19 +971,23 @@ for (h in 1:length(cutOffs))
 		plot(admin0, col=NA, border="gray30", lwd=0.3, add=T)
 		mtext(titles1[h], at=55.265, line=-1.6, cex=0.7, col="gray30")
 		mtext(titles2[h], at=55.257, line=-2.4, cex=0.7, col="gray30")
-		mat = matrix_means[[h]]; multiplier1 = 500; multiplier2 = 2; multiplier3 = 0.1
+		mat = matrix_means[[h]]
 		points(centroids, cex=sqrt((multiplier1*((diag(mat)-minVals1)/(maxVals1-minVals1)))/pi), pch=16, col="#DE432780")
+		if (using_MJs == TRUE)
+			{
+				mat = read.csv(paste0("BEAST_DTA_analysis/With_empirical_trees/Alignment_",analysis,"_MJt",h,".csv"))
+			}
 		for (i in 1:dim(centroids)[1])
 			{
 				for (j in 1:dim(centroids)[1])
 					{
-						if ((i!=j)&(mat[i,j]>1)&(mat[i,j]<30))
+						if ((i!=j)&(mat[i,j]>=0.95)&(mat[i,j]<30))
 							{
 								LWD = (((mat[i,j]-minVals2)/(maxVals2-minVals2))*multiplier2)+0.2; arrow = 0
 								curvedarrow(centroids[i,], centroids[j,], arr.length=arrow*1.3, arr.width=arrow, lwd=LWD, lty=1,
 											lcol="black", arr.col=NA, arr.pos=0.5, curve=0.15, dr=NA, endhead=F, arr.type="none")
 							}
-						if ((i!=j)&(mat[i,j]>1)&(mat[i,j]>=30))
+						if ((i!=j)&(mat[i,j]>=0.95)&(mat[i,j]>=30))
 							{
 								LWD = (((mat[i,j]-minVals2)/(maxVals2-minVals2))*multiplier2)+0.2; arrow = (multiplier3*(mat[i,j]/maxVals2))+0.02
 								curvedarrow(centroids[i,], centroids[j,], arr.length=arrow*1.3, arr.width=arrow, lwd=LWD, lty=1,
@@ -720,7 +1009,8 @@ for (h in 1:length(cutOffs))
 				labels = rev(c("0-300m","300-600m","600-900m","900-1200m","1200-1500m","1500-1800m","1800-2100m","2100-2400m","2400-2700m","2700-3050m"))
 				legend(x=55.725, y=-20.867, labels, text.col="gray30", pch=15, pt.cex=1.3, col=rev(elevation_cols), box.lty=0, cex=0.65, x.intersp=0.75, y.intersp=0.80)
 				legend(x=55.737, y=-21.013, c("",""), text.col=NA, pch=16, pt.cex=1.3, col=c(elevation_cols[1],NA), box.lty=0, cex=0.65, x.intersp=0.75, y.intersp=0.75)
-				legend(x=55.737, y=-21.013, c("Residential","areas"), text.col="gray30", pch=16, pt.cex=1.3, col=c(rgb(77,77,77,120,maxColorValue=255),NA), box.lty=0, cex=0.65, x.intersp=0.75, y.intersp=0.8)
+				legend(x=55.737, y=-21.013, c("Residential","areas"), text.col="gray30", pch=16, pt.cex=1.3, col=c(rgb(77,77,77,120,maxColorValue=255),NA),
+					   box.lty=0, cex=0.65, x.intersp=0.75, y.intersp=0.8)
 			}
 		if (h == 3)
 			{
@@ -749,7 +1039,7 @@ for (h in 1:length(cutOffs))
 	}
 dev.off()
 
-pdf(paste0("Figure_S1_",analysis,".pdf"), width=8, height=7.2) # dev.new(width=8, height=7.2)
+pdf(paste0("Figure_S1_",analysis,"_NEW.pdf"), width=8, height=7.2) # dev.new(width=8, height=7.2)
 par(mfrow=c(2,2), oma=c(0,0,0,0), mar=c(0.0,0.0,0.0,0), lwd=0.3, bty="o", col="gray30", col.axis="gray30", fg="gray30", lheight=0.85)
 months = interval(min(ymd(tab[,"collection_date"])),ymd(tab[,"collection_date"]))%/%months(1)+1
 dates = decimal_date(ymd(tab[,"collection_date"])); minYear = min(decimal_date(ymd("2024-08-01")))
@@ -823,7 +1113,7 @@ system(paste0("magick -units PixelsPerInch -density 1000 Figure_1_241125.pdf -ba
 system(paste0("magick -units PixelsPerInch -density 1000 Figure_2_131225.pdf -background white -alpha remove -flatten Figure_2_131225.png"))
 system(paste0("magick -units PixelsPerInch -density 1000 Figure_S1_061125.pdf -background white -alpha remove -flatten Figure_S1_061125.png"))
 
-	# 6.4. Preparing the input files to generate an animated visualisation with spread.gl
+	# 6.5. Preparing the input files to generate an animated visualisation with spread.gl
 
 buffer = matrix(nrow=dim(centroids)[1], ncol=3); buffer[,1] = row.names(centroids)
 buffer[,3] = centroids[,1]; buffer[,2] = centroids[,2]; colnames(buffer) = c("location","latitude","longitude")
