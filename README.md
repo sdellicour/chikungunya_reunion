@@ -15,9 +15,9 @@ Réunion island just experienced a massive chikungunya virus outbreak in 2024-20
 
 https://github.com/user-attachments/assets/8f9da42a-2186-4795-8510-f4dfe5538e3d
 
-*** Programs used in this study and software requirements
+### Programs used in this study and software requirements
 
-XXXX
+Viral genomic alignments were conduct using [MAFFT]() v7.51134 and inspected manually using the program [AliView]() v1.035. The initial maximum-likelihood (ML) phylogenetic analysis involving non-Réunion sequences and a subset of the Réunion sequences was performed with [IQ-TREE] v1.6.1236 using the best-fit substitution model identified by ModelFinder. Based on the resulting ML phylogenetic tree, the program [TempEst]() was then used to conduct a root-to-tip regression to assess the temporal signal associated with the genomic alignment. All time-scaled phylogenetic inferences (including all the phylodynamic and phylogeographic analyses) were conducted with the software package [BEAST X]() v1.10.5. Markov chain Monte Carlo (MCMC) convergence and mixing was systematically assessed with the program [Tracer]() v1.743, and the maximum clade credibility (MCC) trees were retrieved and annotated with the program [TreeAnnotator]() v1.10.5. All the remaining data analyses and visualisations were done in [R] v4.5.2 using custom scripts as well as functions from the R package "[seraphim]()" v2.0.
 
 
 
