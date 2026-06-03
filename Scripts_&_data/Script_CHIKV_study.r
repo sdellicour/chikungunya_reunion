@@ -5,6 +5,7 @@ library(EpiEstim)
 library(HDInterval)
 library(lubridate)
 library(MetBrewer)
+library(nlme)
 library(seraphim)
 library(sf)
 library(treeio)
@@ -16,10 +17,11 @@ showingPlots = FALSE
 # 2. Preliminary BEAST analysis to estimate the substitution rate
 # 3. Preparing the skygrid and discrete phylogeographic analyses
 # 4. Preparing the different predictors for the discrete-GLM analysis
-# 5. Evolution of Ne and R(t): skygrid and sampling aware analyses
-# 6. Discrete phylogeographic analysis based on the municipalities
-# 7. Analysing and reporting the results of the discrete-GLM analysis
-# 8. Conducting complementary isolation-by-distance (IBD) analyses
+# 5. Preparing climatic predictors for the skygrid/EBDS-GLM analyses
+# 6. Evolution of Ne and R(t): skygrid and sampling aware analyses
+# 7. Discrete phylogeographic analysis based on the municipalities
+# 8. Analysing and reporting the results of the discrete-GLM analysis
+# 9. Conducting complementary isolation-by-distance (IBD) analyses
 
 tab = read.table(paste0("BEAST_CTA_analysis/Alignment_",analysis,".txt"), head=T)
 mostRecentSamplingDatum = max(decimal_date(ymd(tab[,"collection_date"]))) # 2025.595
@@ -34,7 +36,7 @@ main_roads = subset(osm_lines, highway%in%c("trunk","primary"))
 residential_areas = subset(osm_polygons, landuse=="residential")
 construction_areas = subset(osm_polygons, landuse=="construction")
 forest_areas = subset(osm_polygons, landuse=="forest")
-elevation_cols = paste0(divergingx_hcl(14,"fall")[4:14],"BF") # 65% transparency
+elevation_cols = paste0(divergingx_hcl(14,"fall")[4:14],"BF") # 75% transparency
 collection_week_cols1 = met.brewer(name="Hiroshige", n=60, type="continuous")[1:51]
 collection_week_cols2 = met.brewer(name="Hiroshige", n=60, type="continuous")[1:52]
 collection_month_cols = met.brewer(name="Hiroshige", n=14, type="continuous")[1:12]
@@ -69,7 +71,9 @@ write(fas2, paste0("Temporal_signal_test2/Alignment_",analysis,".fas"))
 
 tab1 = read.table(paste0("Temporal_signal_test1/TempEst_regression.txt"), head=T, sep="\t")
 tab2 = read.table(paste0("Temporal_signal_test2/TempEst_regression.txt"), head=T, sep="\t")
+rP = cor(tab1[,"date"], tab1[,"distance"], method="pearson") # rP (Pearson) = 0.82
 lr1 = lm(distance ~ date, data=tab1); R2b = 0.67 # from the 1° root-to-tips regression analysis
+rP = cor(tab2[,"date"], tab2[,"distance"], method="pearson") # rP (Pearson) = 0.84
 lr2 = lm(distance ~ date, data=tab2); R2b = 0.71 # from the 2° root-to-tips regression analysis
 tab3 = read.csv("Cases_symptoms.csv", head=T); buffer = matrix(nrow=dim(tab3)[1], ncol=1)
 colnames(buffer) = "sequences"; tab3 = cbind(tab3, buffer)
@@ -99,7 +103,8 @@ axis(side=2, lwd=0.5, cex.axis=0.85, mgp=c(0,0.55,0), lwd.tick=0.5, col.lab="gra
 title(xlab="Number of weekly cases", mgp=c(1.5,0,0), cex.lab=1.0, col.lab="gray30")
 title(ylab="Genomic samples/week     ", mgp=c(2.7,0,0), cex.lab=1.0, col.lab="gray30")
 mtext(expression(bold(A)), at=-2450, line=-0.95, cex.lab=0.80, col="gray30")
-mtext(expression(bold(R^2~"="~"0.90")), at=700, line=-1.00, cex=0.75, col=rgb(222,67,39,255,maxColorValue=255))
+mtext(expression("Pearson correlation"~"="~"0.82"), at=2160, line=-0.70, cex=0.75, col=rgb(222,67,39,255,maxColorValue=255))
+mtext(expression(R^2~"="~"0.90"), at=700, line=-1.80, cex=0.75, col=rgb(222,67,39,255,maxColorValue=255))
 plot(tab4[,"cases"], tab4[,"sequences"], col=NA, axes=F, ann=F, xlim=c(-170,8500), ylim=c(-17,500))
 abline(lr4, col=rgb(222,67,39,255,maxColorValue=255), lwd=0.75, lty=2)
 points(tab4[,"cases"], tab4[,"sequences"], pch=16, cex=1.0, col=rgb(70,118,187,100,maxColorValue=255))
@@ -110,7 +115,8 @@ axis(side=2, lwd=0.5, cex.axis=0.85, mgp=c(0,0.55,0), lwd.tick=0.5, col.lab="gra
 title(xlab="Number of cases per municipality", mgp=c(1.5,0,0), cex.lab=1.0, col.lab="gray30")
 title(ylab="Gen. samples/municipality       ", mgp=c(2.7,0,0), cex.lab=1.0, col.lab="gray30")
 mtext(expression(bold(B)), at=-2450, line=-0.95, cex.lab=0.80, col="gray30")
-mtext(expression(bold(R^2~"="~"0.86")), at=700, line=-1.00, cex=0.75, col=rgb(222,67,39,255,maxColorValue=255))
+mtext(expression("Pearson correlation"~"="~"0.84"), at=2160, line=-0.70, cex=0.75, col=rgb(222,67,39,255,maxColorValue=255))
+mtext(expression(R^2~"="~"0.86"), at=700, line=-1.80, cex=0.75, col=rgb(222,67,39,255,maxColorValue=255))
 plot(tab1[,"date"], tab1[,"distance"], col=NA, axes=F, ann=F, xlim=c(1961.5,2025), ylim=c(0.0045,0.022))
 abline(lr1, col=rgb(222,67,39,255,maxColorValue=255), lwd=0.75, lty=2)
 points(tab1[,"date"], tab1[,"distance"], pch=16, cex=1.0, col=rgb(70,118,187,100,maxColorValue=255))
@@ -121,7 +127,8 @@ axis(side=2, lwd=0.5, cex.axis=0.85, mgp=c(0,0.55,0), lwd.tick=0.5, col.lab="gra
 title(xlab="Time", mgp=c(1.5,0,0), cex.lab=1.0, col.lab="gray30")
 title(ylab="Root-to-tip divergence    ", mgp=c(2.7,0,0), cex.lab=1.0, col.lab="gray30")
 mtext(expression(bold(C)), at=1945, line=-0.95, cex.lab=0.80, col="gray30")
-mtext(expression(bold(R^2~"="~"0.67")), at=1967.5, line=-1.00, cex=0.75, col=rgb(222,67,39,255,maxColorValue=255))
+mtext(expression("Pearson correlation"~"="~"0.95"), at=1978.2, line=-0.70, cex=0.75, col=rgb(222,67,39,255,maxColorValue=255))
+mtext(expression(R^2~"="~"0.67"), at=1967.5, line=-1.80, cex=0.75, col=rgb(222,67,39,255,maxColorValue=255))
 plot(tab2[,"date"], tab2[,"distance"], col=NA, axes=F, ann=F, xlim=c(1961.5,2025), ylim=c(0.0045,0.022))
 abline(lr2, col=rgb(222,67,39,255,maxColorValue=255), lwd=0.75, lty=2)
 points(tab2[,"date"], tab2[,"distance"], pch=16, cex=1.0, col=rgb(70,118,187,100,maxColorValue=255))
@@ -132,7 +139,8 @@ axis(side=2, lwd=0.5, cex.axis=0.85, mgp=c(0,0.55,0), lwd.tick=0.5, col.lab="gra
 title(xlab="Time", mgp=c(1.5,0,0), cex.lab=1.0, col.lab="gray30")
 title(ylab="Root-to-tip divergence    ", mgp=c(2.7,0,0), cex.lab=1.0, col.lab="gray30")
 mtext(expression(bold(D)), at=1945, line=-0.95, cex.lab=0.80, col="gray30")
-mtext(expression(bold(R^2~"="~"0.71")), at=1967.5, line=-1.00, cex=0.75, col=rgb(222,67,39,255,maxColorValue=255))
+mtext(expression("Pearson correlation"~"="~"0.86"), at=1978.2, line=-0.70, cex=0.75, col=rgb(222,67,39,255,maxColorValue=255))
+mtext(expression(R^2~"="~"0.71"), at=1967.5, line=-1.80, cex=0.75, col=rgb(222,67,39,255,maxColorValue=255))
 dev.off()
 
 # 2. Preliminary BEAST analysis to estimate the substitution rate
@@ -235,7 +243,7 @@ for (i in 1:dim(population_counts)[1])
 		population_counts[i] = as.numeric(gsub(" ","",population_data[index,"Population.en.2021"]))
 		correspondences[i,] = cbind(admins2@data[index,"GID_2"], population_data[i,"Code.géographique"])
 	}
-write.csv(population_counts, "GLM_predictors_data/Prepared_predictors/Population_counts.csv", quote=F)
+write.csv(population_counts, "GLM_predictors_data/Prepared_variables/Discrete-GLM_analyses/Population_counts.csv", quote=F)
 
 	# 4.2. Pairwise great-circle geographic distance between population-weighted centroid points
 
@@ -268,9 +276,9 @@ for (i in 1:dim(centroids)[1])
 					}
 			}
 	}
-write.csv(geographic_distances, "GLM_predictors_data/Prepared_predictors/Geographic_distances.csv", quote=F)
+write.csv(geographic_distances, "GLM_predictors_data/Prepared_variables/Discrete-GLM_analyses/Geographic_distances.csv", quote=F)
 
-	# 4.3. Pairwise measure of the mobility (commuting) flux between municipalities (symetric)
+	# 4.3. Pairwise measure of the professional (commuting) mobility flux between municipalities (symetric; for the main GLM analysis)
 
 mobility_metric = matrix(nrow=dim(admins2@data)[1], ncol=dim(admins2@data)[1])
 row.names(mobility_metric) = admins2@data[,"GID_2"]; colnames(mobility_metric) = admins2@data[,"GID_2"]
@@ -292,9 +300,95 @@ for (i in 1:dim(admins2@data)[1])
 				if ((length(index1) == 0)&(length(index2) == 0)) mobility_metric[i,j] = 0.1
 			}
 	}
-write.csv(mobility_metric, "GLM_predictors_data/Prepared_predictors/Pairwise_mobility_metric.csv", quote=F)
+write.csv(mobility_metric, "GLM_predictors_data/Prepared_variables/Discrete-GLM_analyses/Commuting_metric.csv", quote=F)
 
-# 5. Evolution of Ne and R(t): skygrid and sampling aware analyses
+# 5. Preparing climatic predictors for the skygrid/EBDS-GLM analyses
+
+	# 5.1. Preparation of monthly temperature and precipitation data (source: https://meteo.data.gouv.fr/datasets/6569b3d7d193b4daf2b43edc)
+
+selected_months = c("202406","202407","202408","202409","202410","202411","202412","202501","202502","202503","202504","202505","202506","202507","202508")
+climatic_variables = matrix(nrow=length(selected_months), ncol=5); colnames(climatic_variables) = c("year","month","date","temperature","precipitation")
+climatic_data = read.csv("GLM_predictors_data/Original_data_files/Monthly_climate_data_2024-25.csv", head=T, sep=";")
+climatic_data = climatic_data[which(climatic_data[,"AAAAMM"]%in%selected_months),]; pol_coords = admin0@polygons[[1]]@Polygons[[1]]@coords
+climatic_data = climatic_data[which(point.in.polygon(climatic_data[,"LON"],climatic_data[,"LAT"],pol_coords[,"x"],pol_coords[,"y"])==1),]
+lon_lat = paste0(climatic_data[,"LON"],"_",climatic_data[,"LAT"]); indices = which((is.na(climatic_data[,"TMM"]))|(is.na(climatic_data[,"RR"])))
+lon_lat_to_discard = unique(lon_lat[indices]); climatic_data = climatic_data[which(!lon_lat%in%lon_lat_to_discard),]
+for (i in 1:length(selected_months))
+	{
+		if (selected_months[i] != "202412")
+			{
+				climatic_variables[i,"date"] = mean(decimal_date(ym(c(selected_months[i],as.character(as.numeric(selected_months[i])+1)))))
+			}	else	{
+				climatic_variables[i,"date"] = mean(decimal_date(ym(c(selected_months[i],"202501"))))
+			}
+		climatic_variables[i,"year"] = substr(selected_months[i], 1, 4); climatic_variables[i,"month"] = substr(selected_months[i], 5, 6)
+		climatic_variables[i,"temperature"] = mean(climatic_data[which(climatic_data[,"AAAAMM"]==selected_months[i]),"TMM"]) # °C
+		climatic_variables[i,"precipitation"] = mean(climatic_data[which(climatic_data[,"AAAAMM"]==selected_months[i]),"RR"]) # mm
+	}
+write.csv(climatic_variables, "GLM_predictors_data/Prepared_variables/EBDS_skygrid_analyses/Climatic_variables_monthly.csv", row.names=F, quote=F)
+
+	# 5.2. Preparation of weekly temperature and precipitation data (source: https://cds.climate.copernicus.eu/; retrieved with a Python script)
+
+temperatures = brick("GLM_predictors_data/Original_data_files/ERA5-Land_daily_temperatures.nc")
+precipitations = brick("GLM_predictors_data/Original_data_files/ERA5-Land_daily_precipitations.nc")
+dates = as.POSIXct("1970-01-01 00:00:00", format="%Y-%m-%d %H:%M:%OS") + seconds(data@z$valid_time)
+
+		# 5.2.1. Prepration of the climate data for the skygrid-GLM analyses
+
+climatic_variables_xml = rep("\t\t\tvalue=\"",2); epoch_width = 0.01960784
+climatic_variables = matrix(nrow=60, ncol=3); colnames(climatic_variables) = c("date","temperature","precipitation")
+for (i in 1:60)
+	{
+		date1 = mostRecentSamplingDatum-(i*epoch_width); date2 = date1+epoch_width
+		climatic_variables[i,"date"] = (date1+date2)/2
+		indices = which((decimal_date(dates)>date1)&(decimal_date(dates)<=date2))
+		vS = rep(NA, length(indices))
+		for (j in 1:length(vS))
+			{
+				vS[j] = mean(temperatures[[indices[j]]][], na.rm=T)-273.15 # Kelvins to °C
+			}
+		climatic_variables[i,"temperature"] = mean(vS)
+		climatic_variables_xml[1] = paste0(climatic_variables_xml[1],log(mean(vS))," ")
+		for (j in 1:length(vS))
+			{
+				vS[j] = mean(precipitations[[indices[j]]][], na.rm=T)*1000 # m to mm
+			}
+		climatic_variables[i,"precipitation"] = sum(vS)
+		climatic_variables_xml[2] = paste0(climatic_variables_xml[2],log(sum(vS)*4)," ")
+	}
+write.csv(climatic_variables, "GLM_predictors_data/Prepared_variables/EBDS_skygrid_analyses/Climatic_variables_skygrid.csv", row.names=F, quote=F)
+write(climatic_variables_xml, "GLM_predictors_data/Prepared_variables/EBDS_skygrid_analyses/Climatic_variables_skygrid.txt")
+climatic_variables_monthly = read.csv("GLM_predictors_data/Prepared_variables/EBDS_skygrid_analyses/Climatic_variables_monthly.csv", head=T)
+# plot(climatic_variables_monthly[,c("date","temperature")], type="l"); lines(climatic_variables[,c("date","temperature")], col="red")
+# plot(climatic_variables_monthly[,c("date","precipitation")], type="l"); lines(climatic_variables[,"date"],climatic_variables[,"precipitation"]*4, col="red")
+
+		# 5.2.2. Prepration of the climate data for the EBDS-GLM analyses
+
+epoch_width = 1/52; climatic_variables = matrix(nrow=60, ncol=5)
+colnames(climatic_variables) = c("start_date","end_date","date","temperature","precipitation")
+for (i in 1:60)
+	{
+		date1 = mostRecentSamplingDatum-(i*epoch_width); date2 = date1+epoch_width
+		climatic_variables[i,"date"] = (date1+date2)/2
+		indices = which((decimal_date(dates)>date1)&(decimal_date(dates)<=date2))
+		vS = rep(NA, length(indices))
+		for (j in 1:length(vS))
+			{
+				vS[j] = mean(temperatures[[indices[j]]][], na.rm=T)-273.15 # Kelvins to °C
+			}
+		climatic_variables[i,"temperature"] = mean(vS)
+		for (j in 1:length(vS))
+			{
+				vS[j] = mean(precipitations[[indices[j]]][], na.rm=T)*1000 # m to mm
+			}
+		climatic_variables[i,"precipitation"] = sum(vS)
+	}
+write.csv(climatic_variables, "GLM_predictors_data/Prepared_variables/EBDS_skygrid_analyses/Climatic_variables_EBDS.csv", row.names=F, quote=F)
+climatic_variables_monthly = read.csv("GLM_predictors_data/Prepared_variables/EBDS_skygrid_analyses/Climatic_variables_monthly.csv", head=T)
+# plot(climatic_variables_monthly[,c("date","temperature")], type="l"); lines(climatic_variables[,c("date","temperature")], col="red")
+# plot(climatic_variables_monthly[,c("date","precipitation")], type="l"); lines(climatic_variables[,"date"],climatic_variables[,"precipitation"]*4, col="red")
+
+# 6. Evolution of Ne and R(t): skygrid and sampling aware analyses
 
 		# For the generation (or serial) time distribution, the mean was drawn from a uniform distribution ranging from 8 to 23 days and the standard
 		# deviation from a uniform distribution ranging from 4 to 8 days, reflecting a range of values reported and considered in the literature:
@@ -303,7 +397,7 @@ write.csv(mobility_metric, "GLM_predictors_data/Prepared_predictors/Pairwise_mob
 		#     - Meyer et al. (2023, Epidemics): 13.8 for Italy, 12.2 for Cambodia, and 10.3 days for Bangladesh
 		#     - Meyer et al. (2025, Sci. Adv.): median of 10 days, as well as 9 and 12 days for the warmest and collest populations, respectively
 
-	# 5.1. Estimation of R0 based on the exponential growth rate (Grassly & Fraser, 2008)
+	# 6.1. Estimation of R0 based on the exponential growth rate (Grassly & Fraser, 2008)
 
 n = 1000; mean_range = c(9, 23); sd_range = c(4, 8) # n = number of iterations, and ranges are in days
 log = read.table(paste0("BEAST_DTA_analysis/Without_DTA_model/Alignment_101025_exp.log"), head=T)
@@ -312,6 +406,7 @@ rS2 = sample(rS1, 1000, replace=F); R0s_list = list(); Rfs_list = list()
 R0_lower_95ci = rep(NA, length(rS2)); R0_upper_95ci = rep(NA, length(rS2))
 Rf_lower_95ci = rep(NA, length(rS2)); Rf_upper_95ci = rep(NA, length(rS2))
 pC = 0; pI = 0.66 # as of early November 2025 (see SPF report of 03/11/25)
+pC = 0; pI = (0.66-0.20)/(1.00-0.20) # correction for the study revision
 for (i in 1:length(rS2))
 	{
 		R0s = rep(NA, n); Rfs = rep(NA, n); r = rS2[i]
@@ -329,7 +424,8 @@ R0_upper_95ci_median = median(R0_upper_95ci); R0_upper_95ci_95hpd = hdi(R0_upper
 	# --> R0 estimates range from 1.39 (95% HPD = [1.36, 1.41]) to 2.27 (95% HPD = [2.18, 2.38])
 Rf_lower_95ci_median = median(Rf_lower_95ci); Rf_lower_95ci_95hpd = hdi(Rf_lower_95ci)[1:2]
 Rf_upper_95ci_median = median(Rf_upper_95ci); Rf_upper_95ci_95hpd = hdi(Rf_upper_95ci)[1:2]
-	# --> Rf estimates range from 0.47 (95% HPD = [0.46, 0.48]) to 0.77 (95% HPD = [0.74, 0.81])
+	# --> Rf estimates range from 0.47 (95% HPD = [0.46, 0.48]) to 0.77 (95% HPD = [0.74, 0.81]) if pI = 0.66
+	# --> Rf estimates range from 0.59 (95% HPD = [0.58, 0.60]) to 0.97 (95% HPD = [0.93, 1.01]) if pI = 0.46/0.80
 
 dev.new(width=8/2.8, height=8/3); par(oma=c(0,0,0,0), mar=c(2.8,3.0,1.0,1.0), lwd=0.3, bty="o", col="gray30", col.axis="gray30", fg="gray30")
 plot(density(R0s_list[[1]]), col=NA, xlim=c(0.5,3.5), ylim=c(0,1.65), axes=F, ann=F)
@@ -339,7 +435,7 @@ axis(side=2, lwd=0.5, cex.axis=0.7, mgp=c(0,0.4,-0.1), lwd.tick=0.5, col.lab="gr
 mtext("Density       ", side=2, col="gray30", cex=0.8, line=1.7, las=3)
 mtext("R0", side=1, col="gray30", cex=0.8, line=1.2)
 
-	# 5.2. Setting the parameters for an episodic birth-death-sampling (EBDS) analysis
+	# 6.2. Setting the parameters for an episodic birth-death-sampling (EBDS) analysis
 
 		# Estimation of the transmission period used to anchor the death rate: 8-15 days = 5-8 days of human infectiousness (Cauchemez et al. 2014;
 		# Eurosurveillance, SI data) + 3-7 days to take into account the mosquito extrinsic incubation period (EIP; Zhao et al. 2025, Biosaf. Health).
@@ -398,8 +494,9 @@ quantile(Re, probs=c(0.025,0.5,0.975))
 quantile(del, probs=c(0.025,0.5,0.975))
 quantile(rho, probs=c(0.025,0.5,0.975))
 
-	# 5.3. Visualisation of the evolution through time of the number of cases, Ne, and R(t)
+	# 6.3. Visualisation of the evolution through time of the number of cases, Ne, and R(t)
 
+climatic_variables = read.csv("GLM_predictors_data/Prepared_variables/Climatic_variables_1.csv", head=T)
 tab = read.table(paste0("BEAST_DTA_analysis/Alignment_",analysis,".txt"), head=T, sep="\t")
 tab_weeks = interval(min(ymd(tab[,"collection_date"])),ymd(tab[,"collection_date"]))%/%weeks(1)+1
 skg = read.csv(paste0("BEAST_DTA_analysis/Without_DTA_model/Alignment_",analysis,"_skg.csv"), head=T)[1:51,]
@@ -421,24 +518,6 @@ for (i in 1:dim(Rts)[1])
 		Rts[i,"median"] = median(vS); Rts[i,"95pHDP_lower"] = hpd95[1]; Rts[i,"95pHDP_upper"] = hpd95[2]
 	}
 Rts = Rts[dim(Rts)[1]:1,]
-selected_months = c("202408","202409","202410","202411","202412","202501","202502","202503","202504","202505","202506","202507","202508")
-climatic_variables = matrix(nrow=length(selected_months), ncol=3); colnames(climatic_variables) = c("date","temperature","precipitation")
-climatic_data = read.csv("GLM_predictors_data/Original_data_files/Monthly_climate_data_2024-25.csv", head=T, sep=";")
-climatic_data = climatic_data[which(climatic_data[,"AAAAMM"]%in%selected_months),]; pol_coords = admin0@polygons[[1]]@Polygons[[1]]@coords
-climatic_data = climatic_data[which(point.in.polygon(climatic_data[,"LON"],climatic_data[,"LAT"],pol_coords[,"x"],pol_coords[,"y"])==1),]
-lon_lat = paste0(climatic_data[,"LON"],"_",climatic_data[,"LAT"]); indices = which((is.na(climatic_data[,"TMM"]))|(is.na(climatic_data[,"RR"])))
-lon_lat_to_discard = unique(lon_lat[indices]); climatic_data = climatic_data[which(!lon_lat%in%lon_lat_to_discard),]
-for (i in 1:length(selected_months))
-	{
-		if (selected_months[i] != "202412")
-			{
-				climatic_variables[i,"date"] = mean(decimal_date(ym(c(selected_months[i],as.character(as.numeric(selected_months[i])+1)))))
-			}	else	{
-				climatic_variables[i,"date"] = mean(decimal_date(ym(c(selected_months[i],"202501"))))
-			}
-		climatic_variables[i,"temperature"] = mean(climatic_data[which(climatic_data[,"AAAAMM"]==selected_months[i]),"TMM"]) # °C
-		climatic_variables[i,"precipitation"] = mean(climatic_data[which(climatic_data[,"AAAAMM"]==selected_months[i]),"RR"]) # mm
-	}
 
 pdf(paste0("Figure_1B_",analysis,"_NEW.pdf"), width=8/2, height=8/2) # dev.new(width=8/2, height=8/2)
 par(mfrow=c(3,1), oma=c(0,0,0,0), mar=c(2.0,3.5,0.1,0.5), lwd=0.3, bty="o", col="gray30", col.axis="gray30", fg="gray30")
@@ -489,13 +568,193 @@ axis(side=2, lwd=0.5, cex.axis=0.7, mgp=c(0,0.4,-0.1), lwd.tick=0.5, col.lab="gr
 mtext(expression("Reproduction number R"[t]), side=2, col="gray30", cex=0.55, line=1.7, las=3)
 dev.off()
 
-# 6. Discrete phylogeographic analysis based on the municipalities
+	# 6.4. Visualisation and summary of the skygrid- and EBDS-GLM analyses with covariates
+
+analyses = rep(NA, 6); burnIns = rep(NA, 6); skygrids = list()
+analyses[1] = "Alignment_101025_sa_cov3_lag0"; burnIns[1] = 100000000 # univariate analysis that only includes the log-transformed temperature variable
+analyses[2] = "Alignment_101025_sa_cov4_lag0"; burnIns[2] = 100000000 # univariate analysis that only includes the log-transformed precipitation variable
+analyses[3] = "Alignment_101025_sa_cov2_lag0"; burnIns[3] = 200000000 # multivariate analysis while assuming that the effective population size is associated 
+											   # with one of the two covariates, using indicator variables to select between the two covariates (not used anymore)
+analyses[3] = "Alignment_101025_sa_cov1_lag0"; burnIns[3] = 100000000 # multivariate analysis without assuming that the effective population size is associated 
+											   # with one of the two covariates, using indicator variables to select between the two covariates
+analyses[4] = "Alignment_101025_sa_cov3_lag1"; burnIns[4] = 170000000 # same as "Alignment_101025_sa_cov3_lag0" but condering a 1-month lag with the covariates
+analyses[5] = "Alignment_101025_sa_cov4_lag1"; burnIns[5] = 100000000 # same as "Alignment_101025_sa_cov4_lag0" but condering a 1-month lag with the covariates
+analyses[6] = "Alignment_101025_sa_cov2_lag1"; burnIns[6] = 100000000 # same as "Alignment_101025_sa_cov2_lag0" but condering a 1-month lag with the covariates
+analyses[6] = "Alignment_101025_sa_cov1_lag1"; burnIns[6] = 100000000 # same as "Alignment_101025_sa_cov1_lag0" but condering a 1-month lag with the covariates
+epoch_widths = c(0.09863014,0.08219178,0.08493151,0.08219178,0.08493151,0.07671233,0.08493151,0.08469945,0.08196721,0.08469945,0.08196721)
+for (i in 1:length(analyses))
+	{
+		tab = data.frame(matrix(nrow=12, ncol=6)); colnames(tab) = c("year","month","date","median_Ne","lower_Ne","upper_Ne")
+		log = read.table(paste0("BEAST_DTA_analysis/Without_DTA_model/Alignment_101025_sa_covs/Alignment_101025_sa_covs1/",analyses[i],".log"), head=T)
+		log = log[(which(log[,"state"]==burnIns[i])+1):dim(log)[1],]
+		for (j in 1:dim(tab)[1])
+			{
+				tab[j,"date"] = mostRecentSamplingDatum-sum(epoch_widths[1:j])+(15/365)
+				if (j == dim(tab)[1]) tab[j,"date"] = decimal_date(ymd("2024-08-15"))
+				date = date_decimal(tab[j,"date"]); tab[j,"year"] = format(date,"%Y")
+				tab[j,"month"] = as.numeric(format(date,"%m"))
+				vS = log[,paste0("effPop",j)]
+				tab[j,"median_Ne"] = log(median(vS)+1); hpd95 = log(HDInterval::hdi(vS)+1)
+				tab[j,"lower_Ne"] = hpd95["lower"]; tab[j,"upper_Ne"] = hpd95["upper"]
+			}
+		tab = tab[order(as.numeric(tab[,"date"])),]; skygrids[[i]] = tab
+	}
+
+analyses = rep(NA, 4); burnIns = rep(NA, 4); EBDSs = list()
+analyses[1] = "Alignment_101025_ebds_GP_a_sub0"; burnIns[1] = 30000000 # analysis with a pure log-linear regression baseline
+analyses[2] = "Alignment_101025_ebds_GP_b_sub0"; burnIns[2] = 30000000 # analysis with a a proper squared-exponential kernel
+analyses[3] = "Alignment_101025_ebds_GP_a_sub1"; burnIns[3] = 30000000 # same as the 1° but condering a 1-month lag with the covariates
+analyses[4] = "Alignment_101025_ebds_GP_b_sub1"; burnIns[4] = 30000000 # same as the 2° but condering a 1-month lag with the covariates
+epoch_widths = c(0.09863014,0.08219178,0.08493151,0.08219178,0.08493151,0.07671233,0.08493151,0.08469945,0.08196721,0.08469945,0.08196721)
+for (i in 1:length(analyses))
+	{
+		tab = data.frame(matrix(nrow=12, ncol=6)); colnames(tab) = c("year","month","date","median_Rt","lower_Rt","upper_Rt")
+		log = read.table(paste0("BEAST_DTA_analysis/Without_DTA_model/Alignment_101025_ebds_GP/",analyses[i],".log"), head=T)
+		log = log[(which(log[,"state"]==burnIns[i])+1):dim(log)[1],]
+		for (j in 1:dim(tab)[1])
+			{
+				tab[j,"date"] = mostRecentSamplingDatum-sum(epoch_widths[1:j])+(15/365)
+				if (j == dim(tab)[1]) tab[j,"date"] = decimal_date(ymd("2024-08-15"))
+				date = date_decimal(tab[j,"date"]); tab[j,"year"] = format(date,"%Y")
+				tab[j,"month"] = as.numeric(format(date,"%m"))
+				vS = log[,paste0("effectiveReproductiveNumber",j)]
+				tab[j,"median_Rt"] = median(vS); hpd95 = HDInterval::hdi(vS)
+				tab[j,"lower_Rt"] = hpd95["lower"]; tab[j,"upper_Rt"] = hpd95["upper"]
+			}
+		tab = tab[order(as.numeric(tab[,"date"])),]; EBDSs[[i]] = tab
+	}
+
+dev.new(width=8, height=4) # pdf(paste0("Figure_SX_",analysis,"_NEW.pdf"), width=8, height=4)
+par(mfrow=c(2,3), oma=c(0.2,0.4,1.0,0.5), mar=c(2.5,3.5,0.3,0.5), lwd=0.3, bty="o", col="gray30", col.axis="gray30", fg="gray30")
+labels = c("A","B","C","D","E","F"); months = c("J","J","M","A","M","F","J","D","N","O","S","A")
+for (i in 1:length(skygrids))
+	{
+		plot(skygrids[[i]][,"date"], skygrids[[i]][,"median_Ne"], col=NA, axes=F, xlab=NA, ylab=NA, xlim=c(2024.56,2025.62), ylim=c(0,max(skygrids[[i]][,"upper_Ne"])))
+		timeSlice = 1/13
+		for (j in dim(skygrids[[i]])[1]:1)
+			{
+				colour = paste0(collection_month_cols[j],"BF")
+				x1 = skygrids[[i]][j,"date"]-(timeSlice/2); x2 = skygrids[[i]][j,"date"]+(timeSlice/2)
+				y1 = skygrids[[i]][j,"lower_Ne"]; y2 = skygrids[[i]][j,"upper_Ne"]
+				polygon(c(x1,x2,x2,x1), c(y1,y1,y2,y2), col="gray70", border=NA)
+				polygon(c(x1,x2,x2,x1), c(y1,y1,y2,y2), col=colour, border="gray30")
+				x1 = skygrids[[i]][j,"date"]-(timeSlice/2); x2 = skygrids[[i]][j,"date"]+(timeSlice/2)
+				y1 = skygrids[[i]][j,"median_Ne"]; y2 = skygrids[[i]][j,"median_Ne"]
+				polygon(c(x1,x2,x2,x1), c(y1,y1,y2,y2), col="gray30", border=1)
+			}
+		axis(side=1, lwd=0.5, cex.axis=0.85, mgp=c(0,0.40,0), lwd.tick=0.5, col.lab="gray30", col="gray30", tck=-0.03, las=1, at=skygrids[[i]][,"date"], label=rev(months))
+		axis(side=2, lwd=0.5, cex.axis=0.85, mgp=c(0,0.65,0), lwd.tick=0.5, col.lab="gray30", col="gray30", tck=-0.03, las=1, padj=0.4)
+		title(ylab="Effective population size", mgp=c(1.7,0,0), cex.lab=1.1, col.lab="gray30")
+		mtext(expression(bold(labels[i])), at=-2450, line=-0.95, cex.lab=0.80, col="gray30")
+	}
+
+climatic_variables = read.csv("GLM_predictors_data/Prepared_variables/EBDS_skygrid_analyses/Climatic_variables_monthly.csv", head=T)
+climatic_variable_names = c("temperature","precipitation"); climatic_variable_titles = c("Temperature (°C)","Precipitation (mm)")
+skygrid_tabs = list()
+for (i in 1:8)
+	{
+		tab = data.frame(matrix(nrow=12, ncol=6))
+		if (i == 1) { skygrid = skygrids[[1]]; h = 1 } # skygrid with the temperature covariate, 0-month lag
+		if (i == 2) { skygrid = skygrids[[2]]; h = 2 } # skygrid with the precipitation covariate, 0-month lag
+		if (i == 3) { skygrid = skygrids[[3]]; h = 1 } # skygrid with both covariates and indicators, 0-month lag
+		if (i == 4) { skygrid = skygrids[[3]]; h = 2 } # skygrid with both covariates and indicators, 0-month lag
+		if (i == 5) { skygrid = skygrids[[4]]; h = 1 } # skygrid with the temperature covariate, 1-month lag
+		if (i == 6) { skygrid = skygrids[[5]]; h = 2 } # skygrid with the precipitation covariate, 1-month lag
+		if (i == 7) { skygrid = skygrids[[6]]; h = 1 } # skygrid with both covariates and indicators, 1-month lag
+		if (i == 8) { skygrid = skygrids[[6]]; h = 2 } # skygrid with both covariates and indicators, 1-month lag
+		colnames(tab) = c("year","month",climatic_variable_names[h],"median_Ne","lower_Ne","upper_Ne")
+		tab[,"year"] = as.numeric(skygrid[,"year"]); tab[,"month"] = skygrid[,"month"]; indices = rep(NA, 12)
+		for (j in 1:dim(tab)[1])
+			{
+				indices[j] = which((climatic_variables[,"year"]==tab[j,"year"])&(climatic_variables[,"month"]==tab[j,"month"]))
+			}
+		tab[,climatic_variable_names[h]] = climatic_variables[indices,climatic_variable_names[h]]; tab[,c("median_Ne")] = skygrid[,c("median_Ne")]
+		tab[,c("lower_Ne")] = skygrid[,c("lower_Ne")]; tab[,c("upper_Ne")] = skygrid[,c("upper_Ne")]; skygrid_tabs[[i]] = tab
+	}
+EBDS_tabs = list()
+for (i in 1:8)
+	{
+		tab = data.frame(matrix(nrow=12, ncol=6))
+		if (i == 1) { EBDS = EBDSs[[1]]; h = 1 } # analysis with a pure log-linear regression baseline, 0-month lag
+		if (i == 2) { EBDS = EBDSs[[1]]; h = 2 } # analysis with a pure log-linear regression baseline, 0-month lag
+		if (i == 3) { EBDS = EBDSs[[2]]; h = 1 } # analysis with a a proper squared-exponential kernel, 0-month lag
+		if (i == 4) { EBDS = EBDSs[[2]]; h = 2 } # analysis with a a proper squared-exponential kernel, 0-month lag
+		if (i == 5) { EBDS = EBDSs[[3]]; h = 1 } # analysis with a pure log-linear regression baseline, 1-month lag
+		if (i == 6) { EBDS = EBDSs[[3]]; h = 2 } # analysis with a pure log-linear regression baseline, 1-month lag
+		if (i == 7) { EBDS = EBDSs[[4]]; h = 1 } # analysis with a a proper squared-exponential kernel, 1-month lag
+		if (i == 8) { EBDS = EBDSs[[4]]; h = 2 } # analysis with a a proper squared-exponential kernel, 1-month lag
+		colnames(tab) = c("year","month",climatic_variable_names[h],"median_Rt","lower_Rt","upper_Rt")
+		tab[,"year"] = as.numeric(EBDS[,"year"]); tab[,"month"] = EBDS[,"month"]; indices = rep(NA, 12)
+		for (j in 1:dim(tab)[1])
+			{
+				indices[j] = which((climatic_variables[,"year"]==tab[j,"year"])&(climatic_variables[,"month"]==tab[j,"month"]))
+			}
+		tab[,climatic_variable_names[h]] = climatic_variables[indices,climatic_variable_names[h]]; tab[,c("median_Rt")] = EBDS[,c("median_Rt")]
+		tab[,c("lower_Rt")] = EBDS[,c("lower_Rt")]; tab[,c("upper_Rt")] = EBDS[,c("upper_Rt")]; EBDS_tabs[[i]] = tab
+	}
+
+dev.new(width=8, height=7.1) # pdf(paste0("Figure_2_",analysis,"_NEW.pdf"), width=8, height=7.1)
+par(mfrow=c(4,4), oma=c(0.2,0.3,1.0,0.5), mar=c(3.2,3.2,0.3,0.7), lwd=0.5, bty="o", col="gray30", col.axis="gray30", fg="gray30")
+for (i in 1:length(skygrid_tabs))
+	{
+		if ((i %% 2) == 0)
+			{
+				h = 2
+			}	else	{
+				h = 1
+			}
+		maxY = max(skygrid_tabs[[i]][,"upper_Ne"])+(0.05*max(skygrid_tabs[[i]][,"upper_Ne"]))
+		minX = min(skygrid_tabs[[i]][,climatic_variable_names[h]])-(0.05*((max(skygrid_tabs[[i]][,climatic_variable_names[h]])-min(skygrid_tabs[[i]][,climatic_variable_names[h]]))))
+		maxX = max(skygrid_tabs[[i]][,climatic_variable_names[h]])+(0.05*((max(skygrid_tabs[[i]][,climatic_variable_names[h]])-min(skygrid_tabs[[i]][,climatic_variable_names[h]]))))
+		plot(skygrid_tabs[[i]][,climatic_variable_names[h]], skygrid_tabs[[i]][,"median_Ne"], col="gray30", type="l", lwd=0.5, axes=F, xlab=NA, ylab=NA, xlim=c(minX,maxX), ylim=c(0,maxY))
+		for (j in 1:dim(tab)[1])
+			{
+				plotrix::plotCI(skygrid_tabs[[i]][j,climatic_variable_names[h]], skygrid_tabs[[i]][j,"median_Ne"],
+							    li=skygrid_tabs[[i]][j,"lower_Ne"], ui=skygrid_tabs[[i]][j,"upper_Ne"], add=T, lwd=0.5, col="gray30", pt.bg=NA, pch=16, cex=0.2)
+				points(skygrid_tabs[[i]][j,climatic_variable_names[h]], skygrid_tabs[[i]][j,"median_Ne"], pch=16, cex=1.3, col="white")
+				points(skygrid_tabs[[i]][j,climatic_variable_names[h]], skygrid_tabs[[i]][j,"median_Ne"], pch=16, cex=1.3, col=paste0(collection_month_cols[j],"BF"))
+				points(skygrid_tabs[[i]][j,climatic_variable_names[h]], skygrid_tabs[[i]][j,"median_Ne"], pch=1, cex=1.3, col="gray30", lwd=0.5)
+			}
+		box(lwd=0.5, col="gray30")
+		axis(side=1, lwd=0, cex.axis=0.85, mgp=c(0,0.35,0), lwd.tick=0.5, col.lab="gray30", col="gray30", tck=-0.04, las=1)
+		axis(side=2, lwd=0, cex.axis=0.85, mgp=c(0,0.65,0), lwd.tick=0.5, col.lab="gray30", col="gray30", tck=-0.04, las=1, padj=0.4)
+		title(xlab=climatic_variable_titles[h], mgp=c(1.5,0,0), cex.lab=0.9, col.lab="gray30")
+		title(ylab="Effective population size (log)", mgp=c(1.7,0,0), cex.lab=0.9, col.lab="gray30")
+	}
+for (i in 1:length(EBDS_tabs))
+	{
+		if ((i %% 2) == 0)
+			{
+				h = 2
+			}	else	{
+				h = 1
+			}
+		maxY = max(EBDS_tabs[[i]][,"upper_Rt"])+(0.05*max(EBDS_tabs[[i]][,"upper_Rt"]))
+		minX = min(EBDS_tabs[[i]][,climatic_variable_names[h]])-(0.05*((max(EBDS_tabs[[i]][,climatic_variable_names[h]])-min(EBDS_tabs[[i]][,climatic_variable_names[h]]))))
+		maxX = max(EBDS_tabs[[i]][,climatic_variable_names[h]])+(0.05*((max(EBDS_tabs[[i]][,climatic_variable_names[h]])-min(EBDS_tabs[[i]][,climatic_variable_names[h]]))))
+		plot(EBDS_tabs[[i]][,climatic_variable_names[h]], EBDS_tabs[[i]][,"median_Rt"], col="gray30", type="l", lwd=0.5, axes=F, xlab=NA, ylab=NA, xlim=c(minX,maxX), ylim=c(0,maxY))
+		for (j in 1:dim(tab)[1])
+			{
+				plotrix::plotCI(EBDS_tabs[[i]][j,climatic_variable_names[h]], EBDS_tabs[[i]][j,"median_Rt"],
+							    li=EBDS_tabs[[i]][j,"lower_Rt"], ui=EBDS_tabs[[i]][j,"upper_Rt"], add=T, lwd=0.5, col="gray30", pt.bg=NA, pch=16, cex=0.2)
+				points(EBDS_tabs[[i]][j,climatic_variable_names[h]], EBDS_tabs[[i]][j,"median_Rt"], pch=16, cex=1.3, col="white")
+				points(EBDS_tabs[[i]][j,climatic_variable_names[h]], EBDS_tabs[[i]][j,"median_Rt"], pch=16, cex=1.3, col=paste0(collection_month_cols[j],"BF"))
+				points(EBDS_tabs[[i]][j,climatic_variable_names[h]], EBDS_tabs[[i]][j,"median_Rt"], pch=1, cex=1.3, col="gray30", lwd=0.5)
+			}
+		box(lwd=0.5, col="gray30")
+		axis(side=1, lwd=0, cex.axis=0.85, mgp=c(0,0.35,0), lwd.tick=0.5, col.lab="gray30", col="gray30", tck=-0.04, las=1)
+		axis(side=2, lwd=0, cex.axis=0.85, mgp=c(0,0.65,0), lwd.tick=0.5, col.lab="gray30", col="gray30", tck=-0.04, las=1, padj=0.4)
+		title(xlab=climatic_variable_titles[h], mgp=c(1.5,0,0), cex.lab=0.9, col.lab="gray30")
+		title(ylab="Effective reproduction number", mgp=c(1.7,0,0), cex.lab=0.9, col.lab="gray30")	
+	}
+
+# 7. Discrete phylogeographic analysis based on the municipalities
 
 nberOfTreesToSample = 100; nberOfExtractionFiles = nberOfTreesToSample
 
-	# 6.1. Extracting the spatio-temporal information embedded in posterior trees
+	# 7.1. Extracting the spatio-temporal information embedded in posterior trees
 
-		# 6.1.1. Extracting the lineage transition events for the visualisations
+		# 7.1.1. Extracting the lineage transition events for the visualisations
 
 trees = scan(paste0("BEAST_DTA_analysis/With_empirical_trees/Alignment_",analysis,"_emp1.trees"), what="", sep="\n", quiet=T, blank.lines.skip=F)
 burnIn = 251; index1 = which(trees=="\t\t;")[length(which(trees=="\t\t;"))]; index2 = index1 + burnIn + 1
@@ -550,7 +809,7 @@ for (i in 1:nberOfExtractionFiles)
 			}
 	}
 
-		# 6.1.2. Extracting the Markov jumps for the Shannon entropy estimates
+		# 7.1.2. Extracting the Markov jumps for the Shannon entropy estimates
 
 trees = treeio::read.beast(paste0("BEAST_DTA_analysis/With_empirical_trees/Alignment_",analysis,"_emp2.trees")); tabs = list(); ii = 0
 for (i in 251:length(trees)) # to discard the 250 first sampled trees as burn-in
@@ -624,7 +883,7 @@ for (i in 251:length(trees)) # to discard the 250 first sampled trees as burn-in
 	}
 saveRDS(tabs, paste0("BEAST_DTA_analysis/With_empirical_trees/Alignment_",analysis,"_emp3.rds"))
 
-		# 6.1.3. Averaging the Markov jumps for the overall and four time periods
+		# 7.1.3. Averaging the Markov jumps for the overall and four time periods
 
 if (!file.exists(paste0("BEAST_DTA_analysis/With_empirical_trees/Alignment_",analysis,"_",nberOfExtractionFiles,"_3.csv")))
 	{
@@ -701,9 +960,9 @@ for (h in 1:length(cutOffs))
 		write.table(MJs, paste0("BEAST_DTA_analysis/With_empirical_trees/Alignment_",analysis,"_MJt",h,".csv"), quote=F, sep=",")
 	}
 
-	# 6.2. Computing a normalised Shannon entropy through time for each municipality
+	# 7.2. Computing a normalised Shannon entropy through time for each municipality
 
-		# 6.2.1. First approach based on lineage transition events transition events
+		# 7.2.1. First approach based on lineage transition events transition events
 
 entropies = list()
 selected_periods = c("2024-08","2024-09","2024-10","2024-11","2024-12","2025-01","2025-02","2025-03","2025-04","2025-05","2025-06","2025-07","2025-08")
@@ -774,7 +1033,7 @@ for (i in 1:dim(admins2@data)[1])
 		entropies[[i]] = buffer
 	}
 
-		# 6.2.2. Second approach based on Markov jumps (like in Lemey et al. 2021, Nature)
+		# 7.2.2. Second approach based on Markov jumps (like in Lemey et al. 2021, Nature)
 
 entropies = list()
 tabs = readRDS(paste0("BEAST_DTA_analysis/With_empirical_trees/Alignment_",analysis,"_emp3.rds"))
@@ -822,9 +1081,9 @@ for (i in 1:dim(admins2@data)[1])
 		entropies[[i]] = buffer
 	}
 
-		# 6.2.3. Investigating the correlation between entropy estimates and population counts
+		# 7.2.3. Investigating the correlation between entropy estimates and population counts
 
-population_counts = read.csv("GLM_predictors_data/Prepared_predictors/Population_counts.csv", head=T)
+population_counts = read.csv("GLM_predictors_data/Prepared_variables/Population_counts.csv", head=T)
 mean_entropies = population_counts; mean_entropies[,2] = NA; colnames(mean_entropies)[2] = "mean_entropy"
 for (i in 1:dim(admins2@data)[1]) mean_entropies[i,2] = mean(entropies[[i]][,1], na.rm=T)
 indices = which(!is.na(mean_entropies[,2])); v = cor(population_counts[indices,2], mean_entropies[indices,2], method="spearman")
@@ -833,7 +1092,7 @@ n = 10000; vS_permutations = rep(NA, n); x = population_counts[indices,2]; y = m
 for (i in 1:n) vS_permutations[i] = cor(x, sample(y, length(y), replace=F), method="spearman")
 pValue = sum(v > vS_permutations)/n # p-value = 0.818
 
-		# 6.2.4. Generation of the graphic with the median and 95% HPD for each municipality
+		# 7.2.4. Generation of the graphic with the median and 95% HPD for each municipality
 
 tab_entropies = as.data.frame(matrix(nrow=dim(admins2@data)[1], ncol=5)); writingFiles = FALSE
 tab_entropies[,1] = c(1:dim(admins2@data)[1]); tab_entropies[,2] = admins2@data[,"GID_2"]
@@ -872,7 +1131,7 @@ axis(side=2, lwd=0.5, cex.axis=0.7, mgp=c(0,0.4,-0.1), lwd.tick=0.5, col.lab="gr
 mtext("Normalised Shannon entropy", side=2, col="gray30", cex=0.7, line=1.7, las=3)
 dev.off()
 
-	# 6.3. Visualisation of the time-scaled phylogenetic inference (based on the MCC tree)
+	# 7.3. Visualisation of the time-scaled phylogenetic inference (based on the MCC tree)
 
 tree = readAnnotatedNexus(paste0("BEAST_DTA_analysis/With_empirical_trees/Alignment_",analysis,"_",nberOfExtractionFiles,".tree"))
 tab = read.table(paste0("Alignment_",analysis,".txt"), head=T)
@@ -896,7 +1155,7 @@ for (i in 1:dim(tree$edge)[1])
 add.scale.bar(x=0.37, y=-0.9, length=NULL, ask=F, lwd=0.5 , lcol="gray30", cex=0.7)
 dev.off()
 
-	# 6.4. Visualising the dispersal history of viral lineages among municipalities
+	# 7.4. Visualising the dispersal history of viral lineages among municipalities
 
 nberOfExtractionFiles = 100; tMRCAs = rep(NA, nberOfExtractionFiles)
 for (i in 1:nberOfExtractionFiles)
@@ -959,13 +1218,13 @@ city_name_coordinates = rbind(cbind(55.4185,-20.9145),cbind(55.2492,-21.0033),
 	cbind(55.4277,-21.3689),cbind(55.5153,-21.2709),cbind(55.6179,-20.9854),cbind(55.3499,-21.3176),
 	cbind(55.2473,-20.9507),cbind(55.7690,-21.0375),cbind(55.5900,-21.4130),cbind(55.5790,-20.8934))
 
-pdf(paste0("Figure_2_",analysis,"_NEW.pdf"), width=8, height=7.2); using_MJs = FALSE # dev.new(width=8, height=7.2)
+pdf(paste0("Figure_3_",analysis,"_NEW.pdf"), width=8, height=7.2); using_MJs = FALSE # dev.new(width=8, height=7.2)
 par(mfrow=c(2,2), oma=c(0,0,0,0), mar=c(0.0,0.0,0.0,0), lwd=0.3, bty="o", col="gray30", col.axis="gray30", fg="gray30", lheight=0.85)
 for (h in 1:length(cutOffs))
 	{
 		multiplier1 = 500; multiplier2 = 2; multiplier3 = 0.1
 		plot(admin0, col=NA, border=NA); plot(elevation, add=T, legend=F, col=elevation_cols)
-		plot(residential_areas$geometry, add=T, border=NA, col=rgb(77,77,77,120,maxColorValue=255))
+		plot(residential_areas$geometry, add=T, border=NA, col=rgb(77,77,77,180,maxColorValue=255)) # previously alpha = 120
 		if (h == 1) plot(admins2, add=T, col=NA, border="white", lwd=0.3)
 		plot(main_roads$geometry, add=T, lwd=0.7, col=rgb(222,67,39,255,maxColorValue=255))
 		plot(admin0, col=NA, border="gray30", lwd=0.3, add=T)
@@ -1009,7 +1268,7 @@ for (h in 1:length(cutOffs))
 				labels = rev(c("0-300m","300-600m","600-900m","900-1200m","1200-1500m","1500-1800m","1800-2100m","2100-2400m","2400-2700m","2700-3050m"))
 				legend(x=55.725, y=-20.867, labels, text.col="gray30", pch=15, pt.cex=1.3, col=rev(elevation_cols), box.lty=0, cex=0.65, x.intersp=0.75, y.intersp=0.80)
 				legend(x=55.737, y=-21.013, c("",""), text.col=NA, pch=16, pt.cex=1.3, col=c(elevation_cols[1],NA), box.lty=0, cex=0.65, x.intersp=0.75, y.intersp=0.75)
-				legend(x=55.737, y=-21.013, c("Residential","areas"), text.col="gray30", pch=16, pt.cex=1.3, col=c(rgb(77,77,77,120,maxColorValue=255),NA),
+				legend(x=55.737, y=-21.013, c("Residential","areas"), text.col="gray30", pch=16, pt.cex=1.3, col=c(rgb(77,77,77,180,maxColorValue=255),NA),
 					   box.lty=0, cex=0.65, x.intersp=0.75, y.intersp=0.8)
 			}
 		if (h == 3)
@@ -1048,7 +1307,7 @@ cexs = c(1.0, 0.8, 0.6, 0.7)
 for (h in 1:length(cutOffs))
 	{
 		plot(admin0, col=NA, border=NA); plot(elevation, add=T, legend=F, col=elevation_cols)
-		plot(residential_areas$geometry, add=T, border=NA, col=rgb(77,77,77,120,maxColorValue=255))
+		plot(residential_areas$geometry, add=T, border=NA, col=rgb(77,77,77,180,maxColorValue=255))
 		if (h == 1) plot(admins2, add=T, col=NA, border="white", lwd=0.3)
 		plot(main_roads$geometry, add=T, lwd=0.7, col=rgb(222,67,39,255,maxColorValue=255))
 		plot(admin0, col=NA, border="gray30", lwd=0.3, add=T)
@@ -1074,7 +1333,7 @@ for (h in 1:length(cutOffs))
 				labels = rev(c("0-300m","300-600m","600-900m","900-1200m","1200-1500m","1500-1800m","1800-2100m","2100-2400m","2400-2700m","2700-3050m"))
 				legend(x=55.725, y=-20.867, labels, text.col="gray30", pch=15, pt.cex=1.3, col=rev(elevation_cols), box.lty=0, cex=0.65, x.intersp=0.75, y.intersp=0.80)
 				legend(x=55.737, y=-21.013, c("",""), text.col=NA, pch=16, pt.cex=1.3, col=c(elevation_cols[1],NA), box.lty=0, cex=0.65, x.intersp=0.75, y.intersp=0.75)
-				legend(x=55.737, y=-21.013, c("Residential","areas"), text.col="gray30", pch=16, pt.cex=1.3, col=c(rgb(77,77,77,120,maxColorValue=255),NA), box.lty=0, cex=0.65, x.intersp=0.75, y.intersp=0.8)
+				legend(x=55.737, y=-21.013, c("Residential","areas"), text.col="gray30", pch=16, pt.cex=1.3, col=c(rgb(77,77,77,180,maxColorValue=255),NA), box.lty=0, cex=0.65, x.intersp=0.75, y.intersp=0.8)
 			}
 		if (h == 4)
 			{
@@ -1092,7 +1351,7 @@ maxYear = max(dates); endYears_colours = collection_month_cols[(((dates-minYear)
 for (h in 1:2)
 	{
 		plot(admin0, col=NA, border=NA); plot(elevation, add=T, legend=F, col=elevation_cols)
-		plot(residential_areas$geometry, add=T, border=NA, col=rgb(77,77,77,120,maxColorValue=255))
+		plot(residential_areas$geometry, add=T, border=NA, col=rgb(77,77,77,200,maxColorValue=255))
 		plot(main_roads$geometry, add=T, lwd=0.7, col=rgb(222,67,39,255,maxColorValue=255))
 		plot(admin0, col=NA, border="gray30", lwd=0.3, add=T)
 		sub = tab; sub = sub[order(sub[,"collection_date"]),]
@@ -1105,15 +1364,11 @@ for (h in 1:2)
 		labels = rev(c("0-300m","300-600m","600-900m","900-1200m","1200-1500m","1500-1800m","1800-2100m","2100-2400m","2400-2700m","2700-3050m"))
 		legend(x=55.725, y=-20.867, labels, text.col="gray30", pch=15, pt.cex=1.3, col=rev(elevation_cols), box.lty=0, cex=0.65, x.intersp=0.75, y.intersp=0.80)
 		legend(x=55.737, y=-21.013, c("",""), text.col=NA, pch=16, pt.cex=1.3, col=c(elevation_cols[1],NA), box.lty=0, cex=0.65, x.intersp=0.75, y.intersp=0.75)
-		legend(x=55.737, y=-21.013, c("Residential","areas"), text.col="gray30", pch=16, pt.cex=1.3, col=c(rgb(77,77,77,120,maxColorValue=255),NA), box.lty=0, cex=0.65, x.intersp=0.75, y.intersp=0.8)
+		legend(x=55.737, y=-21.013, c("Residential","areas"), text.col="gray30", pch=16, pt.cex=1.3, col=c(rgb(77,77,77,200,maxColorValue=255),NA), box.lty=0, cex=0.65, x.intersp=0.75, y.intersp=0.8)
 	}
 dev.off()
 
-system(paste0("magick -units PixelsPerInch -density 1000 Figure_1_241125.pdf -background white -alpha remove -flatten Figure_1_241125.png"))
-system(paste0("magick -units PixelsPerInch -density 1000 Figure_2_131225.pdf -background white -alpha remove -flatten Figure_2_131225.png"))
-system(paste0("magick -units PixelsPerInch -density 1000 Figure_S1_061125.pdf -background white -alpha remove -flatten Figure_S1_061125.png"))
-
-	# 6.5. Preparing the input files to generate an animated visualisation with spread.gl
+	# 7.5. Preparing the input files to generate an animated visualisation with spread.gl
 
 buffer = matrix(nrow=dim(centroids)[1], ncol=3); buffer[,1] = row.names(centroids)
 buffer[,3] = centroids[,1]; buffer[,2] = centroids[,2]; colnames(buffer) = c("location","latitude","longitude")
@@ -1141,7 +1396,7 @@ for (i in 1:dim(buffer)[1])
 	}
 write.csv(buffer, paste0("BEAST_DTA_analysis/With_empirical_trees/Alignment_",analysis,"_mcc.csv"), row.names=F, quote=F)
 
-# 7. Analysing and reporting the results of the discrete-GLM analysis
+# 8. Analysing and reporting the results of the discrete-GLM analysis
 
 predictors = c("population_count_origin","population_count_destination","geographic_distances","pairwise_mobility_metric",
 			   "temperature_origin","temperature_destination","precipitation_origin","precipitation_destination")
@@ -1163,7 +1418,71 @@ for (i in 1:length(predictors))
 	}
 write.csv(glm_results, paste0("BEAST_DTA_analysis/With_empirical_trees/Alignment_",analysis,"_glm.csv"), quote=F)
 
-# 8. Conducting complementary isolation-by-distance (IBD) analyses
+# 9. Conducting complementary isolation-by-distance (IBD) analyses
+
+	# 9.1. Approach based on the code within the "spreadStatistics" function (too slow)
+
+nberOfExtractionFiles = 100; rP2s = rep(NA, nberOfExtractionFiles)
+for (i in 1:nberOfExtractionFiles)
+	{
+		tab = read.csv(paste0("BEAST_DTA_analysis/With_empirical_trees/Alignment_",analysis,"_",nberOfExtractionFiles,"_ext/TreeExtractions_",i,".csv"), head=T)
+		tipNodeIndices = which(!tab[,"node2"]%in%tab[,"node1"])
+		distTree = matrix(nrow=length(tipNodeIndices), ncol=length(tipNodeIndices))
+		for (k in 2:dim(distTree)[1]) # extracted from the "spreadStatistics" function of "seraphim"
+			{
+				for (l in 1:(k-1))
+					{
+						index1 = tipNodeIndices[k]
+						index2 = tipNodeIndices[l]
+						indices1 = index1; root = FALSE
+						while (root == FALSE)
+							{	
+								if (tab[indices1[length(indices1)],"node1"]%in%tab[,"node2"])
+									{
+										indices1 = c(indices1, which(tab[,"node2"]==tab[indices1[length(indices1)],"node1"]))
+									}	else	{
+										root = TRUE
+									}
+							}
+						indices2 = index2; root = FALSE
+						while (root == FALSE)
+							{	
+								if (tab[indices2[length(indices2)],"node1"]%in%tab[,"node2"])
+									{
+										indices2 = c(indices2, which(tab[,"node2"]==tab[indices2[length(indices2)],"node1"]))
+									}	else	{
+										root = TRUE
+									}
+							}
+						indices3 = indices1[which(indices1%in%indices2)]; patristic_dis = NULL
+						if (length(indices3) == 0)
+							{
+								patristic_dis = sum(tab[c(indices1,indices2),"length"])
+							}	else	{
+								patristic_dis = sum(tab[c(indices1[which(!indices1%in%indices3)],indices2[which(!indices2%in%indices3)]),"length"])
+							}
+						distTree[k,l] = patristic_dis; distTree[l,k] = patristic_dis
+					}
+			}
+		distsGeo = matrix(nrow=dim(distTree)[1], ncol=dim(distTree)[2])
+		for (k in 2:dim(distsGeo)[1]) # extracted from the "spreadStatistics" function of "seraphim"
+			{
+				for (l in 1:(k-1))
+					{
+						index1 = tipNodeIndices[k]
+						index2 = tipNodeIndices[l]
+						x1 = cbind(tab[index1,"endLon"], tab[index1,"endLat"])
+						x2 = cbind(tab[index2,"endLon"], tab[index2,"endLat"])
+						distsGeo[k,l] = rdist.earth(x1, x2, miles=F, R=NULL)
+						distsGeo[l,k] = distsGeo[k,l]
+					}
+			}	
+		rP2s[i] = cor(distTree[lower.tri(distTree)],log(distsGeo[lower.tri(distsGeo)]+1), method="pearson")
+	}
+meanV = round(mean(rP2s), 3); hpd95 = round(hdi(rP2s)[1:2], 3)
+cat("rP2 = ",meanV,", 95% HPD = [",hpd95[1],", ",hpd95[2],"]\n",sep="")
+
+	# 9.2. Approach based on the pairwise patristic distances directly computed on trees
 
 nberOfExtractionFiles = 100; rP2s = rep(NA, nberOfExtractionFiles)
 trees = read.nexus(paste0("BEAST_DTA_analysis/With_empirical_trees/Alignment_",analysis,"_",nberOfExtractionFiles,".trees"))
