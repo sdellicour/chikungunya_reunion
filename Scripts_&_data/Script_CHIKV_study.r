@@ -571,22 +571,22 @@ dev.off()
 	# 6.4. Visualisation and summary of the skygrid- and EBDS-GLM analyses with covariates
 
 analyses = rep(NA, 6); burnIns = rep(NA, 6); skygrids = list()
-analyses[1] = "Alignment_101025_sa_cov3_lag0"; burnIns[1] = 100000000 # univariate analysis that only includes the log-transformed temperature variable
-analyses[2] = "Alignment_101025_sa_cov4_lag0"; burnIns[2] = 100000000 # univariate analysis that only includes the log-transformed precipitation variable
-analyses[3] = "Alignment_101025_sa_cov2_lag0"; burnIns[3] = 200000000 # multivariate analysis while assuming that the effective population size is associated 
-											   # with one of the two covariates, using indicator variables to select between the two covariates (not used anymore)
-analyses[3] = "Alignment_101025_sa_cov1_lag0"; burnIns[3] = 100000000 # multivariate analysis without assuming that the effective population size is associated 
-											   # with one of the two covariates, using indicator variables to select between the two covariates
-analyses[4] = "Alignment_101025_sa_cov3_lag1"; burnIns[4] = 170000000 # same as "Alignment_101025_sa_cov3_lag0" but condering a 1-month lag with the covariates
-analyses[5] = "Alignment_101025_sa_cov4_lag1"; burnIns[5] = 100000000 # same as "Alignment_101025_sa_cov4_lag0" but condering a 1-month lag with the covariates
-analyses[6] = "Alignment_101025_sa_cov2_lag1"; burnIns[6] = 100000000 # same as "Alignment_101025_sa_cov2_lag0" but condering a 1-month lag with the covariates
-analyses[6] = "Alignment_101025_sa_cov1_lag1"; burnIns[6] = 100000000 # same as "Alignment_101025_sa_cov1_lag0" but condering a 1-month lag with the covariates
+analyses[1] = "Alignment_101025_sa_covs1/Alignment_101025_sa_cov3_lag0a"; burnIns[1] = 100000000 # univariate analysis that only includes the log-transformed temperature variable
+analyses[2] = "Alignment_101025_sa_covs1/Alignment_101025_sa_cov4_lag0a"; burnIns[2] = 100000000 # univariate analysis that only includes the log-transformed precipitation variable
+analyses[3] = "Alignment_101025_sa_covs1/Alignment_101025_sa_cov2_lag0a"; burnIns[3] = 200000000 # multivariate analysis while assuming that the effective population size is associated 
+											   						# with one of the two covariates, using indicator variables to select between the two covariates (not used anymore)
+analyses[3] = "Alignment_101025_sa_covs2/Alignment_101025_sa_cov1_lag0"; burnIns[3] = 0 # (combined) multivariate analysis without assuming that the effective population size is associated 
+											   						# with one of the two covariates, using indicator variables to select between the two covariates
+analyses[4] = "Alignment_101025_sa_covs1/Alignment_101025_sa_cov3_lag1a"; burnIns[4] = 170000000 # same as "Alignment_101025_sa_cov3_lag0" but condering a 1-month lag with the covariates
+analyses[5] = "Alignment_101025_sa_covs1/Alignment_101025_sa_cov4_lag1a"; burnIns[5] = 100000000 # same as "Alignment_101025_sa_cov4_lag0" but condering a 1-month lag with the covariates
+analyses[6] = "Alignment_101025_sa_covs1/Alignment_101025_sa_cov2_lag1a"; burnIns[6] = 100000000 # same as "Alignment_101025_sa_cov2_lag0" but condering a 1-month lag with the covariates
+analyses[6] = "Alignment_101025_sa_covs2/Alignment_101025_sa_cov1_lag1"; burnIns[6] = 0 # (combined) same as "Alignment_101025_sa_cov1_lag0" but condering a 1-month lag with the covariates
 epoch_widths = c(0.09863014,0.08219178,0.08493151,0.08219178,0.08493151,0.07671233,0.08493151,0.08469945,0.08196721,0.08469945,0.08196721)
 for (i in 1:length(analyses))
 	{
 		tab = data.frame(matrix(nrow=12, ncol=6)); colnames(tab) = c("year","month","date","median_Ne","lower_Ne","upper_Ne")
-		log = read.table(paste0("BEAST_DTA_analysis/Without_DTA_model/Alignment_101025_sa_covs/Alignment_101025_sa_covs1/",analyses[i],".log"), head=T)
-		log = log[(which(log[,"state"]==burnIns[i])+1):dim(log)[1],]
+		log = read.table(paste0("BEAST_DTA_analysis/Without_DTA_model/Alignment_101025_sa_covs/",analyses[i],".log"), head=T)
+		if (burnIns[i] != 0) log = log[(which(log[,"state"]==burnIns[i])+1):dim(log)[1],]
 		for (j in 1:dim(tab)[1])
 			{
 				tab[j,"date"] = mostRecentSamplingDatum-sum(epoch_widths[1:j])+(15/365)
@@ -601,16 +601,16 @@ for (i in 1:length(analyses))
 	}
 
 analyses = rep(NA, 4); burnIns = rep(NA, 4); EBDSs = list()
-analyses[1] = "Alignment_101025_ebds_GP_a_sub0"; burnIns[1] = 30000000 # analysis with a pure log-linear regression baseline
-analyses[2] = "Alignment_101025_ebds_GP_b_sub0"; burnIns[2] = 30000000 # analysis with a a proper squared-exponential kernel
-analyses[3] = "Alignment_101025_ebds_GP_a_sub1"; burnIns[3] = 30000000 # same as the 1° but condering a 1-month lag with the covariates
-analyses[4] = "Alignment_101025_ebds_GP_b_sub1"; burnIns[4] = 30000000 # same as the 2° but condering a 1-month lag with the covariates
+analyses[1] = "Alignment_101025_ebds_GP_a_lag0"; burnIns[1] = 0 # analysis with a pure log-linear regression baseline
+analyses[2] = "Alignment_101025_ebds_GP_b_lag0"; burnIns[2] = 0 # analysis with a a proper squared-exponential kernel
+analyses[3] = "Alignment_101025_ebds_GP_a_lag1"; burnIns[3] = 0 # same as the 1° but condering a 1-month lag with the covariates
+analyses[4] = "Alignment_101025_ebds_GP_b_lag1"; burnIns[4] = 0 # same as the 2° but condering a 1-month lag with the covariates
 epoch_widths = c(0.09863014,0.08219178,0.08493151,0.08219178,0.08493151,0.07671233,0.08493151,0.08469945,0.08196721,0.08469945,0.08196721)
 for (i in 1:length(analyses))
 	{
 		tab = data.frame(matrix(nrow=12, ncol=6)); colnames(tab) = c("year","month","date","median_Rt","lower_Rt","upper_Rt")
 		log = read.table(paste0("BEAST_DTA_analysis/Without_DTA_model/Alignment_101025_ebds_GP/",analyses[i],".log"), head=T)
-		log = log[(which(log[,"state"]==burnIns[i])+1):dim(log)[1],]
+		if (burnIns[i] != 0) log = log[(which(log[,"state"]==burnIns[i])+1):dim(log)[1],]
 		for (j in 1:dim(tab)[1])
 			{
 				tab[j,"date"] = mostRecentSamplingDatum-sum(epoch_widths[1:j])+(15/365)
@@ -654,19 +654,19 @@ skygrid_tabs = list()
 for (i in 1:8)
 	{
 		tab = data.frame(matrix(nrow=12, ncol=6))
-		if (i == 1) { skygrid = skygrids[[1]]; h = 1 } # skygrid with the temperature covariate, 0-month lag
-		if (i == 2) { skygrid = skygrids[[2]]; h = 2 } # skygrid with the precipitation covariate, 0-month lag
-		if (i == 3) { skygrid = skygrids[[3]]; h = 1 } # skygrid with both covariates and indicators, 0-month lag
-		if (i == 4) { skygrid = skygrids[[3]]; h = 2 } # skygrid with both covariates and indicators, 0-month lag
-		if (i == 5) { skygrid = skygrids[[4]]; h = 1 } # skygrid with the temperature covariate, 1-month lag
-		if (i == 6) { skygrid = skygrids[[5]]; h = 2 } # skygrid with the precipitation covariate, 1-month lag
-		if (i == 7) { skygrid = skygrids[[6]]; h = 1 } # skygrid with both covariates and indicators, 1-month lag
-		if (i == 8) { skygrid = skygrids[[6]]; h = 2 } # skygrid with both covariates and indicators, 1-month lag
+		if (i == 1) { skygrid = skygrids[[1]]; h = 1; lag = 0 } # skygrid with the temperature covariate, 0-month lag
+		if (i == 2) { skygrid = skygrids[[2]]; h = 2; lag = 0 } # skygrid with the precipitation covariate, 0-month lag
+		if (i == 3) { skygrid = skygrids[[3]]; h = 1; lag = 0 } # skygrid with both covariates and indicators, 0-month lag
+		if (i == 4) { skygrid = skygrids[[3]]; h = 2; lag = 0 } # skygrid with both covariates and indicators, 0-month lag
+		if (i == 5) { skygrid = skygrids[[4]]; h = 1; lag = 1 } # skygrid with the temperature covariate, 1-month lag
+		if (i == 6) { skygrid = skygrids[[5]]; h = 2; lag = 1 } # skygrid with the precipitation covariate, 1-month lag
+		if (i == 7) { skygrid = skygrids[[6]]; h = 1; lag = 1 } # skygrid with both covariates and indicators, 1-month lag
+		if (i == 8) { skygrid = skygrids[[6]]; h = 2; lag = 1 } # skygrid with both covariates and indicators, 1-month lag
 		colnames(tab) = c("year","month",climatic_variable_names[h],"median_Ne","lower_Ne","upper_Ne")
 		tab[,"year"] = as.numeric(skygrid[,"year"]); tab[,"month"] = skygrid[,"month"]; indices = rep(NA, 12)
 		for (j in 1:dim(tab)[1])
 			{
-				indices[j] = which((climatic_variables[,"year"]==tab[j,"year"])&(climatic_variables[,"month"]==tab[j,"month"]))
+				indices[j] = which((climatic_variables[,"year"]==tab[j,"year"])&(climatic_variables[,"month"]==tab[j,"month"]))-lag
 			}
 		tab[,climatic_variable_names[h]] = climatic_variables[indices,climatic_variable_names[h]]; tab[,c("median_Ne")] = skygrid[,c("median_Ne")]
 		tab[,c("lower_Ne")] = skygrid[,c("lower_Ne")]; tab[,c("upper_Ne")] = skygrid[,c("upper_Ne")]; skygrid_tabs[[i]] = tab
@@ -675,19 +675,19 @@ EBDS_tabs = list()
 for (i in 1:8)
 	{
 		tab = data.frame(matrix(nrow=12, ncol=6))
-		if (i == 1) { EBDS = EBDSs[[1]]; h = 1 } # analysis with a pure log-linear regression baseline, 0-month lag
-		if (i == 2) { EBDS = EBDSs[[1]]; h = 2 } # analysis with a pure log-linear regression baseline, 0-month lag
-		if (i == 3) { EBDS = EBDSs[[2]]; h = 1 } # analysis with a a proper squared-exponential kernel, 0-month lag
-		if (i == 4) { EBDS = EBDSs[[2]]; h = 2 } # analysis with a a proper squared-exponential kernel, 0-month lag
-		if (i == 5) { EBDS = EBDSs[[3]]; h = 1 } # analysis with a pure log-linear regression baseline, 1-month lag
-		if (i == 6) { EBDS = EBDSs[[3]]; h = 2 } # analysis with a pure log-linear regression baseline, 1-month lag
-		if (i == 7) { EBDS = EBDSs[[4]]; h = 1 } # analysis with a a proper squared-exponential kernel, 1-month lag
-		if (i == 8) { EBDS = EBDSs[[4]]; h = 2 } # analysis with a a proper squared-exponential kernel, 1-month lag
+		if (i == 1) { EBDS = EBDSs[[1]]; h = 1; lag = 0 } # analysis with a pure log-linear regression baseline, 0-month lag
+		if (i == 2) { EBDS = EBDSs[[1]]; h = 2; lag = 0 } # analysis with a pure log-linear regression baseline, 0-month lag
+		if (i == 3) { EBDS = EBDSs[[2]]; h = 1; lag = 0 } # analysis with a proper squared-exponential kernel, 0-month lag
+		if (i == 4) { EBDS = EBDSs[[2]]; h = 2; lag = 0 } # analysis with a proper squared-exponential kernel, 0-month lag
+		if (i == 5) { EBDS = EBDSs[[3]]; h = 1; lag = 1 } # analysis with a pure log-linear regression baseline, 1-month lag
+		if (i == 6) { EBDS = EBDSs[[3]]; h = 2; lag = 1 } # analysis with a pure log-linear regression baseline, 1-month lag
+		if (i == 7) { EBDS = EBDSs[[4]]; h = 1; lag = 1 } # analysis with a proper squared-exponential kernel, 1-month lag
+		if (i == 8) { EBDS = EBDSs[[4]]; h = 2; lag = 1 } # analysis with a proper squared-exponential kernel, 1-month lag
 		colnames(tab) = c("year","month",climatic_variable_names[h],"median_Rt","lower_Rt","upper_Rt")
 		tab[,"year"] = as.numeric(EBDS[,"year"]); tab[,"month"] = EBDS[,"month"]; indices = rep(NA, 12)
 		for (j in 1:dim(tab)[1])
 			{
-				indices[j] = which((climatic_variables[,"year"]==tab[j,"year"])&(climatic_variables[,"month"]==tab[j,"month"]))
+				indices[j] = which((climatic_variables[,"year"]==tab[j,"year"])&(climatic_variables[,"month"]==tab[j,"month"]))-lag
 			}
 		tab[,climatic_variable_names[h]] = climatic_variables[indices,climatic_variable_names[h]]; tab[,c("median_Rt")] = EBDS[,c("median_Rt")]
 		tab[,c("lower_Rt")] = EBDS[,c("lower_Rt")]; tab[,c("upper_Rt")] = EBDS[,c("upper_Rt")]; EBDS_tabs[[i]] = tab
