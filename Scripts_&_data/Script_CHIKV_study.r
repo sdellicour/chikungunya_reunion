@@ -364,8 +364,8 @@ climatic_variables_monthly = read.csv("GLM_predictors_data/Prepared_variables/EB
 
 		# 5.2.2. Prepration of the climate data for the EBDS-GLM analyses
 
-epoch_width = 1/52; climatic_variables = matrix(nrow=60, ncol=5)
-colnames(climatic_variables) = c("start_date","end_date","date","temperature","precipitation")
+epoch_width = 1/52; climatic_variables = matrix(nrow=60, ncol=3)
+colnames(climatic_variables) = c("date","temperature","precipitation")
 for (i in 1:60)
 	{
 		date1 = mostRecentSamplingDatum-(i*epoch_width); date2 = date1+epoch_width
@@ -496,7 +496,7 @@ quantile(rho, probs=c(0.025,0.5,0.975))
 
 	# 6.3. Visualisation of the evolution through time of the number of cases, Ne, and R(t)
 
-climatic_variables = read.csv("GLM_predictors_data/Prepared_variables/EBDS_skygrid_analyses/Climatic_variables_EBDS.csv", head=T)
+climatic_variables = read.csv("GLM_predictors_data/Prepared_variables/EBDS_skygrid_analyses/Climatic_variables_monthly.csv", head=T)
 tab = read.table(paste0("BEAST_DTA_analysis/Alignment_",analysis,".txt"), head=T, sep="\t")
 tab_weeks = interval(min(ymd(tab[,"collection_date"])),ymd(tab[,"collection_date"]))%/%weeks(1)+1
 skg = read.csv(paste0("BEAST_DTA_analysis/Without_DTA_model/Alignment_",analysis,"_skg.csv"), head=T)[1:51,]
