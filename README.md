@@ -1,7 +1,3 @@
-
-
-https://github.com/user-attachments/assets/f17771cd-b3a8-4e68-af70-270e72d03620
-
 Chikungunya virus outbreak on the Réunion island
 ===============
 
@@ -19,9 +15,9 @@ Réunion island experienced a massive chikungunya virus epidemic in 2024-2025, w
 
 <img src="Scripts_&_data/Figure_3_290726.png" align="center" alt="" />
 
-**Figure 3. Phylogeographic analysis of the dispersal history of viral lineages during the 2024-2025 chikungunya virus (CHIKV) epidemic on Réunion island.** The maps correspond to four successive snapshots displaying the discrete phylogeographic reconstruction of the dispersal history of CHIKV lineages conducted at the municipality level. On these maps, municipalities are associated with a transparent red dot with the size being proportional to the number of inferred lineages within the considered municipality (each dot having been placed at the centroid point computed from the sampling locations of all genomic sequences collected in the municipality), and curved arrows illustrate with their thickness the expected number of viral lineage transition events inferred from one municipality to another during the considered time period. These topographic maps are coloured according to the altitude or in grey when corresponding to residential areas. Red lines correspond to the main roads on the island and, solely reported on the first map, white lines correspond to the borders of the municipalities. On this first map, we also report the position and names of the main urban areas (dark grey dots). See also the GitHub repository associated with the present study for an animation of the discrete phylogeographic reconstruction generated with the [spread.gl](https://github.com/GuyBaele/SpreadGL) program.
+**Figure 3. Phylogeographic analysis of the dispersal history of viral lineages during the 2024-2025 chikungunya virus (CHIKV) epidemic on Réunion island.** The maps correspond to four successive snapshots displaying the discrete phylogeographic reconstruction of the dispersal history of CHIKV lineages conducted at the municipality level. On these maps, municipalities are associated with a transparent red dot with the size being proportional to the number of inferred lineages within the considered municipality (each dot having been placed at the centroid point computed from the sampling locations of all genomic sequences collected in the municipality), and curved arrows illustrate with their thickness the expected number of viral lineage transition events inferred from one municipality to another during the considered time period. These topographic maps are coloured according to the altitude or in grey when corresponding to residential areas. Red lines correspond to the main roads on the island and, solely reported on the first map, white lines correspond to the borders of the municipalities. On this first map, we also report the position and names of the main urban areas (dark grey dots). See also below for an animation of the discrete phylogeographic reconstruction generated on Google Earth:
 
-https://github.com/user-attachments/assets/8f9da42a-2186-4795-8510-f4dfe5538e3d
+https://github.com/user-attachments/assets/f17771cd-b3a8-4e68-af70-270e72d03620
 
 ### Programs used in this study, software requirements, and computation times
 
